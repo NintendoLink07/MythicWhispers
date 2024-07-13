@@ -1,0 +1,11 @@
+## Interface: 100207
+## Title: MythicWhispers
+## Author: Rhany-Ravencrest
+## Notes: The new standard for WoW /w chats
+## Version: 0.0.1
+## SavedVariables: MW_SavedSettings, MW_ChatLogs
+## AddonCompartmentFunc: MW_OpenInterfaceOptions
+
+MainFrame.lua
+XML/MW_MainFrame.xml
+XML/MW_ChatLineTemplate.xml

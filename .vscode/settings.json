@@ -1,0 +1,16 @@
+{
+    "Lua.diagnostics.globals": [
+        "CreateFontStringPool",
+        "WorldFrame",
+        "ScrollUtil",
+        "CreateTreeDataProvider",
+        "CreateScrollBoxListTreeListView",
+        "CreateDataProvider",
+        "CreateScrollBoxListLinearView",
+        "class",
+        "Settings",
+        "PVEFrame",
+        "ChatFrame_AddMessageEventFilter",
+        "UIErrorsFrame"
+    ]
+}

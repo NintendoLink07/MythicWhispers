@@ -1,0 +1,85 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+    <Frame name="MW_MainFrame" inherits="BackdropTemplate" movable="true" registerForDrag="LeftButton" enableMouse="true" hidden="true" virtual="true" toplevel="true">
+        <Layers>
+            <Layer level="BACKGROUND" textureSubLevel="1">
+                <Texture parentKey="Background" setAllPoints="true" />
+            </Layer>
+        </Layers>
+
+        <Frames>
+            <Button parentKey="CloseButton" inherits="UIPanelCloseButton">
+                <Size x="20" y="20"/>
+                <Anchors>
+                    <Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-2" y="-2"/>
+                </Anchors>
+
+                <Scripts>
+                    <OnClick>
+                        self:GetParent():Hide()
+                    </OnClick>
+                </Scripts>
+            </Button> 
+            
+            <Button parentKey="Settings">
+                <Size x="20" y="20"/>
+
+                <NormalTexture atlas="GM-icon-settings" />
+
+                <Anchors>
+                        <Anchor point="RIGHT" relativeKey="$parent.CloseButton" relativePoint="LEFT" x="-1"/>
+                </Anchors>
+
+                <Scripts>
+                    <OnClick>
+                        MW_OpenInterfaceOptions()
+                    </OnClick>
+                </Scripts>
+            </Button>
+            
+            <Frame parentKey="ChatsBar" inherits="HorizontalLayoutFrame, BackdropTemplate">
+                <KeyValues>
+                    <KeyValue key="fixedHeight" value="22" type="number" />
+                </KeyValues>
+
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="2" y="-2"/>
+                    <Anchor point="TOPRIGHT" relativeKey="$parent.Settings" relativePoint="TOPLEFT" x="-2" y="-2"/>
+                </Anchors>
+            </Frame>
+
+            <EditBox parentKey="ChatBox" inherits="InputBoxTemplate" autoFocus="false" font="SystemFont_Shadow_Med1">
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT" relativeKey="$parent" relativePoint="BOTTOMLEFT" x="6" y="1"/>
+                    <Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" x="-1" y="1"/>
+                </Anchors>
+
+                <Size y="20" />  
+            </EditBox>
+
+            <EditBox parentKey="CopyBox" inherits="InputBoxTemplate" autoFocus="true" font="SystemFont_Shadow_Med1">
+                <Size y="20" />   
+                
+                <Scripts>
+                    <OnKeyDown>
+                        if(key == "ESCAPE" or key == "ENTER") then
+                            self:Hide()
+                            self:ClearFocus()
+
+                        end
+                    </OnKeyDown>
+                </Scripts>    
+            </EditBox>
+        </Frames>
+
+        <Scripts>
+            <OnDragStart>
+                self:StartMoving()
+            </OnDragStart>
+
+            <OnDragStop>
+                self:StopMovingOrSizing()
+            </OnDragStop>
+        </Scripts>
+    </Frame>
+</Ui>

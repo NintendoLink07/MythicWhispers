@@ -1,0 +1,81 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+    <Frame name="MW_ChatLineTemplate" virtual="true">
+        <Size y="20" />
+        <Layers>
+            <Layer level="OVERLAY">
+                <FontString parentKey="Timestamp" font="SystemFont_Shadow_Med1" justifyH="LEFT" justifyV="MIDDLE" outline="NORMAL" text="[TIME]">
+                    <Size x="65" />
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" />
+                    </Anchors>
+
+                    <Scripts>
+                        <OnMouseDown>
+                            local copybox = self:GetParent():GetParent():GetParent():GetParent().CopyBox
+                            copybox:SetText(self:GetParent().Text:GetText())
+                            copybox:SetSize(self:GetParent().Text:GetWidth() - 3, self:GetParent().Text:GetHeight())
+                            copybox:SetPoint("TOPLEFT", self, "TOPRIGHT", 3, 0)
+                            copybox:Show()
+                        </OnMouseDown>
+                    </Scripts>
+                </FontString>
+
+                <FontString parentKey="Text" font="SystemFont_Shadow_Med1" justifyH="LEFT" justifyV="TOP" outline="NORMAL" text="" wordwrap="true" nonspacewrap="true">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.Timestamp" relativePoint="TOPRIGHT" x="3"/>
+                        <Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-2"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+    </Frame>
+
+    <Frame name="MW_ChatButton" virtual="true">
+        <Size y="20" />
+        
+        <Frames>
+            <Button parentKey="CloseButton" inherits="UIPanelCloseButton">
+                <Size x="14" y="14"/>
+                <Anchors>
+                    <Anchor point="RIGHT" relativeKey="$parent" relativePoint="RIGHT" x="-1"/>
+                </Anchors>
+            </Button>
+        </Frames>
+
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture parentKey="Background" atlas="pvpqueue-button-casual-up" setAllPoints="true" />
+                <Texture parentKey="BackgroundSelected" atlas="pvpqueue-button-casual-highlight" alphaMode="ADD" setAllPoints="true" />
+            </Layer>
+
+            <Layer level="ARTWORK">
+                <Texture parentKey="Status">
+                    <Size x="5" y="5" />
+                    <Anchors>
+                        <Anchor point="LEFT" relativeKey="$parent" relativePoint="LEFT" x="5"/>
+                    </Anchors>
+                </Texture>
+                
+                <MaskTexture parentKey="BorderMask" file="Interface/CHARACTERFRAME/TempPortraitAlphaMask" vWrapMode="CLAMPTOBLACKADDITIVE" hWrapMode="CLAMPTOBLACKADDITIVE">
+					<Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.Status" relativePoint="TOPLEFT"/>
+                        <Anchor point="BOTTOMRIGHT" relativeKey="$parent.Status" relativePoint="BOTTOMRIGHT"/>
+					</Anchors>
+					<MaskedTextures>
+						<MaskedTexture childKey="Status"/>
+					</MaskedTextures>
+				</MaskTexture>
+            </Layer>
+
+            <Layer level="OVERLAY">
+                <FontString parentKey="Name" font="SystemFont_Shadow_Med1" justifyH="LEFT" justifyV="MIDDLE" outline="NORMAL" text="" wordwrap="false" nonspacewrap="false">
+                    <Anchors>
+                        <Anchor point="LEFT" relativeKey="$parent.Status" relativePoint="RIGHT" x="2"/>
+                        <Anchor point="RIGHT" relativeKey="$parent.CloseButton" relativePoint="LEFT" x="-2"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+    </Frame>
+</Ui>
