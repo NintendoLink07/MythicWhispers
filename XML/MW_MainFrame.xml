@@ -8,8 +8,44 @@
         </Layers>
 
         <Frames>
-            <Button parentKey="CloseButton" inherits="UIPanelCloseButton">
+            <Frame parentKey="LogBox" inherits="WoWScrollBoxList" hidden="true">
+                <Size x="200" />
+
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPRIGHT" x="1" y="-20"/>
+                    <Anchor point="BOTTOMLEFT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" x="1"/>
+                </Anchors>
+                <Frames>
+                    <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPRIGHT" />
+                            <Anchor point="BOTTOMLEFT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" />
+                        </Anchors>
+                    </EventFrame>
+                </Frames>
+                
+                <Layers>
+                    <Layer level="BACKGROUND" textureSubLevel="1">
+                        <Texture parentKey="Background" setAllPoints="true" />
+                    </Layer>
+                </Layers>
+            </Frame>
+
+            <Button parentKey="LogButton" inherits="UIPanelButtonTemplate">
                 <Size x="20" y="20"/>
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPRIGHT" x="2"/>
+                </Anchors>
+
+                <Scripts>
+                    <OnClick>
+
+                    </OnClick>
+                </Scripts>
+            </Button>
+
+            <Button parentKey="CloseButton" inherits="UIPanelCloseButton">
+                <Size x="19" y="19"/>
                 <Anchors>
                     <Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-2" y="-2"/>
                 </Anchors>
@@ -27,7 +63,7 @@
                 <NormalTexture atlas="GM-icon-settings" />
 
                 <Anchors>
-                        <Anchor point="RIGHT" relativeKey="$parent.CloseButton" relativePoint="LEFT" x="-1"/>
+                    <Anchor point="RIGHT" relativeKey="$parent.CloseButton" relativePoint="LEFT" x="-1"/>
                 </Anchors>
 
                 <Scripts>
@@ -37,16 +73,72 @@
                 </Scripts>
             </Button>
             
-            <Frame parentKey="ChatsBar" inherits="HorizontalLayoutFrame, BackdropTemplate">
-                <KeyValues>
-                    <KeyValue key="fixedHeight" value="22" type="number" />
-                </KeyValues>
+            <Button parentKey="CycleRight">
+                <Size x="20" y="20"/>
+
+                <NormalTexture atlas="wowlabs-spectatecycling-arrowright" />
+                <DisabledTexture atlas="wowlabs-spectatecycling-arrowright_disabled" />
 
                 <Anchors>
-                    <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="2" y="-2"/>
-                    <Anchor point="TOPRIGHT" relativeKey="$parent.Settings" relativePoint="TOPLEFT" x="-2" y="-2"/>
+                    <Anchor point="RIGHT" relativeKey="$parent.Settings" relativePoint="LEFT" x="-1"/>
                 </Anchors>
-            </Frame>
+
+                <Scripts>
+                    <OnClick>
+                        if(self:GetParent().ChatButtonScrollFrame:GetHorizontalScroll() + 30 > self:GetParent().ChatButtonScrollFrame:GetHorizontalScrollRange()) then
+                            self:GetParent().ChatButtonScrollFrame:SetHorizontalScroll(self:GetParent().ChatButtonScrollFrame:GetHorizontalScrollRange())
+
+                        else
+                            self:GetParent().ChatButtonScrollFrame:SetHorizontalScroll(self:GetParent().ChatButtonScrollFrame:GetHorizontalScroll() + 30)
+
+                        end
+                    </OnClick>
+                </Scripts>
+            </Button>
+            
+            <Button parentKey="CycleLeft">
+                <Size x="20" y="20"/>
+
+                <NormalTexture atlas="wowlabs-spectatecycling-arrowleft" />
+                <DisabledTexture atlas="wowlabs-spectatecycling-arrowleft_disabled" />
+
+                <Anchors>
+                    <Anchor point="RIGHT" relativeKey="$parent.CycleRight" relativePoint="LEFT" x="-1"/>
+                </Anchors>
+
+                <Scripts>
+                    <OnClick>
+                        if(0 > self:GetParent().ChatButtonScrollFrame:GetHorizontalScroll() - 30) then
+                            self:GetParent().ChatButtonScrollFrame:SetHorizontalScroll(0)
+
+                        else
+                            self:GetParent().ChatButtonScrollFrame:SetHorizontalScroll(self:GetParent().ChatButtonScrollFrame:GetHorizontalScroll() - 30)
+
+                        end
+                    </OnClick>
+                </Scripts>
+            </Button>
+            
+            <ScrollFrame parentKey="ChatButtonScrollFrame" inherits="ScrollFrameTemplate">
+                <Size y="21" />
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="2" y="-1"/>
+                    <Anchor point="TOPRIGHT" relativeKey="$parent.CycleLeft" relativePoint="TOPLEFT" x="-2" y="-1"/>
+                </Anchors>
+
+                <ScrollChild>
+                    <Frame parentKey="ChatButtonContainer" inherits="HorizontalLayoutFrame, BackdropTemplate">
+                        <KeyValues>
+                            <KeyValue key="fixedHeight" value="21" type="number" />
+                        </KeyValues>
+
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="2" y="-1"/>
+                            <Anchor point="TOPRIGHT" relativeKey="$parent.CycleLeft" relativePoint="TOPLEFT" x="-2" y="-1"/>
+                        </Anchors>
+                    </Frame>w
+                </ScrollChild>
+            </ScrollFrame>
 
             <EditBox parentKey="ChatBox" inherits="InputBoxTemplate" autoFocus="false" font="SystemFont_Shadow_Med1">
                 <Anchors>
@@ -57,7 +149,21 @@
                 <Size y="20" />  
             </EditBox>
 
-            <EditBox parentKey="CopyBox" inherits="InputBoxTemplate" autoFocus="true" font="SystemFont_Shadow_Med1">
+            <Frame parentKey="ScrollBox" inherits="WoWScrollBoxList">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeKey="$parent.ChatButtonScrollFrame" relativePoint="BOTTOMLEFT" x="´0" y="-3"/>
+                    <Anchor point="BOTTOMRIGHT" relativeKey="$parent.ChatBox" relativePoint="TOPRIGHT" x="-20" y="3"/>
+                </Anchors>
+            </Frame>
+
+            <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeKey="$parent.ScrollBox" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMLEFT" relativeKey="$parent.ScrollBox" relativePoint="BOTTOMRIGHT" />
+                </Anchors>
+            </EventFrame>
+
+            <EditBox parentKey="CopyBox" inherits="InputBoxTemplate" framestrata="FULLSCREEN" autoFocus="false" font="SystemFont_Shadow_Med1">
                 <Size y="20" />   
                 
                 <Scripts>
@@ -68,8 +174,12 @@
 
                         end
                     </OnKeyDown>
-                </Scripts>    
+                </Scripts>
             </EditBox>
+
+            <Frame parentKey="RightClickMenu" inherits="MIOG_DropDownMenu" mixin="SlickDropDown">
+                <Size x="120" y="22" />
+            </Frame>
         </Frames>
 
         <Scripts>

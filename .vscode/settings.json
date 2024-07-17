@@ -11,6 +11,11 @@
         "Settings",
         "PVEFrame",
         "ChatFrame_AddMessageEventFilter",
-        "UIErrorsFrame"
+        "UIErrorsFrame",
+        "CreateFramePool",
+        "CreateTexturePool",
+        "ITEM_QUALITY_COLORS",
+        "GameTooltip_AddBlankLineToTooltip",
+        "SlashCmdList"
     ]
 }
