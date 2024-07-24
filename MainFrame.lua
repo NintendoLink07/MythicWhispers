@@ -16,18 +16,13 @@ local chatProvider = CreateDataProvider()
 
 local framePool
 
+local fullPlayerName
+
 ns.F = {}
 
 local invisibleString = UIParent:CreateFontString(nil, "BACKGROUND", "SystemFont_Shadow_Med1")
-invisibleString:SetWidth((GetScreenWidth() / 6) - 80)
-invisibleString:Show()
-
-local function calculateElementExtent(index, data)
-    invisibleString:SetHeight(2000)
-    invisibleString:SetText(data.text)
-
-    return invisibleString:GetStringHeight() + invisibleString:GetNumLines() * chatLineSpacing
-end
+invisibleString:SetWidth((GetScreenWidth() / 6) - 40)
+--invisibleString:Show()
 
 local function sanitizeTextInput(text)
     if(strlen(text) > 255) then
@@ -71,164 +66,46 @@ local function calculateFontStringWidth(fontstring, text)
     return fontstring:GetStringWidth()
 end
 
+local function calculateElementExtent(index, data)
+    invisibleString:SetHeight(2000)
+    invisibleString:SetText(data.text)
+
+    return invisibleString:GetStringHeight() + chatLineSpacing
+end
+
 local function calculateFontStringHeight(fontstring, text)
     fontstring:SetHeight(2000)
     fontstring:SetText(text)
 
-    return fontstring:GetStringHeight() + fontstring:GetNumLines() * chatLineSpacing
+    return fontstring:GetStringHeight() + chatLineSpacing
 end
 
-local function createFrameBorder(frame, thickness, r, g, b, a)
-	frame:SetBackdrop( { bgFile="Interface\\ChatFrame\\ChatFrameBackground", tileSize=20, tile=false, edgeFile="Interface\\ChatFrame\\ChatFrameBackground", edgeSize = thickness} )
-	frame:SetBackdropColor(0, 0, 0, 0) -- main area color
-	frame:SetBackdropBorderColor(r or random(0, 1), g or random(0, 1), b or random(0, 1), a or 1) -- border color
-
-end
-
-local function createNewDataProvider()
-    ns.MainFrame.dataProvider = CreateDataProvider()
-    ns.MainFrame.ScrollView:SetDataProvider(ns.MainFrame.dataProvider)
-
-end
-
-local function addNewestMessageToChat(playerName, text)
-    if(currentWhisper == playerName) then
-        ns.MainFrame.dataProvider:Insert(text)
-
-    end
-end
-
-local function loadTenLogLines(playerName)
-    if(#MW_ChatLogs[playerName].logs > 0) then
-        local numberOfLogs = #MW_ChatLogs[playerName].logs
-
-        ns.MainFrame.ScrollView:SetDataProvider(ns.MainFrame.dataProvider)
-
-        if(numberOfLogs > 10 + activeChats[playerName].lastLoadedLog) then
-            ns.MainFrame.dataProvider:Insert({status = "more", text = "BLANK", playerName = playerName})
-            
-        end
-        
-        for i = 11 + activeChats[playerName].lastLoadedLog, 2, -1 do
-            local currentLog = MW_ChatLogs[playerName].logs[numberOfLogs - (i - 1)]
-            
-            if(currentLog) then
-                currentLog.old = true
-                ns.MainFrame.dataProvider:Insert(currentLog)
-
-            end
-        end
-
-        local lastMessage = MW_ChatLogs[playerName].logs[numberOfLogs]
-
-        if(#MW_ChatLogs[playerName].logs > 1) then
-            ns.MainFrame.dataProvider:Insert({status = "empty", text = "BLANK", playerName})
-        end
-
-        ns.MainFrame.dataProvider:Insert(lastMessage)
-    end
-end
-
-local function loadChatFrame(playerName, loadLogs, switchView)
-    createNewDataProvider()
-
-    if(switchView) then
-        activeChats[playerName].lastLoadedLog = 0
-
-    end
-
-    if(loadLogs) then
-        loadTenLogLines(playerName)
-    end
-
-    if(switchView) then
-
-        if(currentWhisper) then
-            activeChats[currentWhisper].BackgroundSelected:Hide()
-        end
-
-        if(playerName) then
-            if(activeChats[playerName]) then
-                activeChats[playerName].BackgroundSelected:Show()
-                currentWhisper = playerName
-                ns.MainFrame.ScrollBox:ScrollToEnd()
-
-            end
-            
-        end
-    else
-        ns.MainFrame.ScrollBox:ScrollToBegin()
-    
-    end
-
-    ns.MainFrame.ChatButtonScrollFrame.ChatButtonContainer:MarkDirty()
-end
-
-local function Initializer(frame, data)
-    if(not data.status) then
-        local newTimestamp
-
-        if(date("%d") ~= data.day or date("%m") ~= data.month) then
-            newTimestamp = data.day .. "/" .. data.month .. " " .. data.timestamp
-        else
-            newTimestamp = data.timestamp
-        end
-
-        local newWidth = calculateFontStringWidth(frame.Timestamp, "[" .. newTimestamp .. "]")
-        frame.Timestamp:SetWidth(newWidth)
-
-        local newHeight = calculateFontStringHeight(frame.Text, data.text)
-        frame.Text:SetHeight(newHeight)
-        
-        if(data.old) then
-            frame.Text:SetTextColor(0.4, 0.4, 0.4, 1)
-
-        else
-            frame.Text:SetTextColor(1, 1, 1, 1)
-        
-        end
-    else
-        if(data.status == "empty") then
-            frame.Timestamp:SetText("")
-            frame.Text:SetText("")
-        
-        elseif(data.status == "more") then
-            frame.Timestamp:SetText("")
-            frame.Text:SetTextColor(1, 1, 1, 1)
-            frame.Text:SetText("There are more messages...")
-            frame.layoutIndex = -99999999
-            frame:SetScript("OnMouseDown", function()
-                loadChatFrame(data.playerName, true, false)
-
-                activeChats[data.playerName].lastLoadedLog = activeChats[data.playerName].lastLoadedLog + 10
-                
-            end)
-        end
-    end
-end
-
--- --------------------------------------------------------------------------------------------------------------------------------
--- This is a very long line of words that is way longer than the fontstring itself, which is then going to get resized as a result.
-
-local function closeChatFrame(playerName)
-    playerName = playerName
+local function closeChat(playerName)
     framePool:Release(activeChats[playerName])
     activeChats[playerName] = nil
 
     if(currentWhisper == playerName) then
         currentWhisper = nil
     end
+    
+    ns.MainFrame.ChatButtonScrollFrame.Container:MarkDirty()
 
-    local children = ns.MainFrame.ChatButtonScrollFrame.ChatButtonContainer:GetLayoutChildren()
-    local newName
-
-    createNewDataProvider()
+    local children = ns.MainFrame.ChatButtonScrollFrame.Container:GetLayoutChildren()
     
     if(#children > 0) then
-        loadChatFrame(children[1].fullName, true, true)
+        ns.checkPlayerForChatFrame(children[1].fullName, true)
+    
+    else
+        ns.MainFrame.DataProvider:Flush()
     
     end
+
+    ns.MainFrame.Status:Hide()
 end
+
+-- --------------------------------------------------------------------------------------------------------------------------------
+-- This is a very long line of words that is way longer than the fontstring itself, which is then going to get resized as a result.
+
 local function addButtonTooltip(playerName, specialFlags)
     activeChats[playerName]:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -244,10 +121,11 @@ local function addButtonTooltip(playerName, specialFlags)
         GameTooltip:AddLine("Race: " .. MW_ChatLogs[playerName].race)
 
         if(ns.F.IS_RAIDERIO_LOADED) then
-            GameTooltip_AddBlankLineToTooltip(GameTooltip)
             local profile = RaiderIO.GetProfile(playerName)
 
             if(profile) then
+                GameTooltip_AddBlankLineToTooltip(GameTooltip)
+
                 if(profile.mythicKeystoneProfile) then
                     GameTooltip:AddLine("M+ Rating: " .. wticc(profile.mythicKeystoneProfile.currentScore, ns.createCustomColorForRating(profile.mythicKeystoneProfile.currentScore):GenerateHexColor()))
 
@@ -267,12 +145,13 @@ local function addButtonTooltip(playerName, specialFlags)
 
                     for k, v in ipairs(orderedData) do
                         --panelProgressString = panelProgressString .. v.shortName .. ": " .. wticc(ns.DIFFICULTY[v.difficulty].shortName .. ":" .. v.progress .. "/" .. v.bossCount, ns.DIFFICULTY[v.difficulty].color) .. "\n"
+                        if(v.difficulty ~= -1) then
+                            if(not ordinalTable[v.ordinal]) then
+                                ordinalTable[v.ordinal] = v.shortName .. ": "
+                            end
 
-                        if(not ordinalTable[v.ordinal]) then
-                            ordinalTable[v.ordinal] = v.shortName .. ": "
+                            ordinalTable[v.ordinal] = ordinalTable[v.ordinal] .. wticc(ns.DIFFICULTY[v.difficulty].shortName .. ":" .. v.progress .. "/" .. v.bossCount, ns.DIFFICULTY[v.difficulty].color) .. " "
                         end
-
-                        ordinalTable[v.ordinal] = ordinalTable[v.ordinal] .. wticc(ns.DIFFICULTY[v.difficulty].shortName .. ":" .. v.progress .. "/" .. v.bossCount, ns.DIFFICULTY[v.difficulty].color) .. " "
                     end
 
                     for k, v in ipairs(ordinalTable) do
@@ -284,6 +163,10 @@ local function addButtonTooltip(playerName, specialFlags)
                 end
 
                 GameTooltip:AddLine("Raid Progress: " .. panelProgressString)
+
+            else
+                GameTooltip:AddLine("No RaiderIO data found")
+            
             end
         end
 
@@ -295,114 +178,190 @@ local function addButtonTooltip(playerName, specialFlags)
     end)
 end
 
-local function createNewChatFrame(playerName)
+local function createChatButton(playerName)
     local chatButton = framePool:Acquire()
-
-    activeChats[playerName] = chatButton
-
-    local shortName = createShortNameFrom("unitName", playerName)
-
-    local newWidth = calculateFontStringWidth(chatButton.Name, wticc(shortName, MW_ChatLogs[playerName].class and C_ClassColor.GetClassColor(MW_ChatLogs[playerName].class):GenerateHexColor() or "FFFFFFFF"))
-    chatButton:SetWidth(newWidth + 30)
+    chatButton.layoutIndex = #ns.MainFrame.ChatButtonScrollFrame.Container:GetLayoutChildren() + 1
+    chatButton:SetWidth(50)
+    chatButton:Show()
     chatButton.fullName = playerName
     chatButton.lastLoadedLog = 0
-    chatButton:SetParent(ns.MainFrame.ChatButtonScrollFrame.ChatButtonContainer)
-    chatButton.layoutIndex = #ns.MainFrame.ChatButtonScrollFrame.ChatButtonContainer:GetLayoutChildren() + 1
-    chatButton:Show()
+
+    local shortName = createShortNameFrom("unitName", playerName)
+    local coloredName = wticc(shortName, MW_ChatLogs[playerName].class and C_ClassColor.GetClassColor(MW_ChatLogs[playerName].class):GenerateHexColor() or "FFFFFFFF")
+
+    local specialText = MW_ChatLogs[playerName].specialText and MW_ChatLogs[playerName].specialText .. " " or ""
+
+    local newWidth = calculateFontStringWidth(chatButton.Name, specialText .. coloredName)
+    chatButton:SetWidth(newWidth + 30)
 
     chatButton:SetScript("OnMouseDown", function(self, button)
-        if(button == "RightButton") then
-            ns.MainFrame.RightClickMenu:ResetDropDown()
-
-            local info = {}
-
-            info.index = 1
-            info.entryType = "option"
-            info.text = "Test"
-            info.value = 1
-            info.radioHidden = true
-            info.func = function()
-
+        if(button == "LeftButton") then
+            if(currentWhisper ~= playerName) then
+                ns.checkPlayerForChatFrame(playerName, true)
             end
-
-            ns.MainFrame.RightClickMenu:CreateEntryFrame(info)
-            ns.MainFrame.RightClickMenu:SetPoint("TOPLEFT", self, "BOTTOMLEFT")
-            ns.MainFrame.RightClickMenu:Click()
-
-        elseif(button == "LeftButton") then
-            loadChatFrame(playerName, true, true)
         
             C_FriendList.SetWhoToUi(false)
             lastWhoPlayer = playerName
             C_FriendList.SendWho("n-" .. playerName, 2)
         end
-
     end)
 
-    chatButton.CloseButton:SetScript("OnClick", function(self)
-        closeChatFrame(playerName)
+    chatButton.CloseButton:SetScript("OnClick", function()
+        closeChat(playerName)
     end)
+
+    activeChats[playerName] = chatButton
 
     addButtonTooltip(playerName)
 
-    ns.MainFrame.ChatButtonScrollFrame.ChatButtonContainer:MarkDirty()
-
-    if(ns.MainFrame.ChatButtonScrollFrame:GetHorizontalScrollRange() > 0) then
-        ns.MainFrame.CycleLeft:Enable()
-        ns.MainFrame.CycleRight:Enable()
-    end
-
-    if(currentWhisper == nil) then
-        loadChatFrame(playerName, true, true)
-
-        activeChats[playerName].lastLoadedLog = activeChats[playerName].lastLoadedLog + 10
-    end
+    ns.MainFrame.ChatButtonScrollFrame.Container:MarkDirty()
 end
 
-local function jumpToChatButton(playerName)
-    local children = ns.MainFrame.ChatButtonScrollFrame.ChatButtonContainer:GetLayoutChildren()
+local function loadLastLogs(playerName)
+    if(#MW_ChatLogs[playerName].logs > 1) then
+        local numberOfLogs = #MW_ChatLogs[playerName].logs
 
-    local endOfLastChild = 0
+        if(activeChats[playerName].lastLoadedLog + 10 < numberOfLogs) then
+            ns.MainFrame.DataProvider:Insert({playerName = playerName, text="BLANK", status = "more"})
+        end
+        
+        for i = 11 + activeChats[playerName].lastLoadedLog, 2, -1 do
+            local currentLog = MW_ChatLogs[playerName].logs[numberOfLogs - (i - 1)]
 
-    for k, v in ipairs(children) do
-        endOfLastChild = endOfLastChild + v:GetWidth()
-
-        if(playerName == v.fullName) then
-            if(endOfLastChild > ns.MainFrame.ChatButtonScrollFrame:GetWidth()) then
-                ns.MainFrame.ChatButtonScrollFrame:SetHorizontalScroll(endOfLastChild - ns.MainFrame.ChatButtonScrollFrame:GetWidth())
-
-                if(k == 1) then
-                    ns.MainFrame.CycleLeft:Disable()
-
-                else
-                    ns.MainFrame.CycleLeft:Enable()
-                
-                end
-
-                if(k == #children) then
-                    ns.MainFrame.CycleRight:Disable()
-                    
-                else
-                    ns.MainFrame.CycleRight:Enable()
-                
-                end
-            else
-                ns.MainFrame.ChatButtonScrollFrame:SetHorizontalScroll(0)
-            
+            if(currentLog) then
+                currentLog.old = true
+                ns.MainFrame.DataProvider:Insert(currentLog)
             end
         end
     end
 
-    loadChatFrame(playerName, true, true)
-
+    if(MW_ChatLogs[playerName].lastMessageSeen == false and currentWhisper ~= playerName) then
+        ns.MainFrame.DataProvider:Insert({playerName = playerName, text="BLANK", status = "empty"})
+    end
 end
 
-local function xyz()
+local function checkPlayerForChatFrame(playerName, switchToPlayer)
+    switchToPlayer = switchToPlayer or #ns.MainFrame.ChatButtonScrollFrame.Container:GetLayoutChildren() == 0
+    local playerHasNoChatButton = not activeChats[playerName]
+
+    if(playerHasNoChatButton) then
+        createChatButton(playerName)
+    
+    end
+
+    if(switchToPlayer) then
+        ns.MainFrame.DataProvider:Flush()
+        
+        if(currentWhisper) then
+            activeChats[currentWhisper].BackgroundSelected:Hide()
+
+        end
+
+        activeChats[playerName].BackgroundSelected:Show()
+
+        --if(currentWhisper ~= playerName) then
+            loadLastLogs(playerName)
+        --end
+
+        currentWhisper = playerName
+    end
+
+    if(currentWhisper == playerName) then
+        ns.MainFrame.DataProvider:Insert(MW_ChatLogs[playerName].logs[#MW_ChatLogs[playerName].logs])
+        ns.MainFrame.ScrollBox:ScrollToEnd()
+
+        MW_ChatLogs[playerName].lastMessageSeen = true
+        
+    else
+        activeChats[playerName].BackgroundHighlight:Show()
+
+    end
+
+    ns.MainFrame.ScrollView:SetDataProvider(ns.MainFrame.DataProvider)
+
+    if(not MW_ChatLogs[playerName].isFriend and not MW_ChatLogs[playerName].whitelisted) then
+        ns.MainFrame.ScrollBox:Hide()
+        ns.MainFrame.Status:Show()
+
+    else
+        ns.MainFrame.ScrollBox:Show()
+        ns.MainFrame.Status:Hide()
+    
+    end
+
+    if(not ns.MainFrame:IsShown() and not InCombatLockdown()) then
+
+        ns.MainFrame:Show()
+    end
+end
+
+ns.checkPlayerForChatFrame = checkPlayerForChatFrame
+
+local function Initializer(frame, data)
+    if(not data.status) then
+        local newTimestamp
+
+        if(date("%d") ~= data.day or date("%m") ~= data.month) then
+            newTimestamp = data.day .. "/" .. data.month .. " " .. data.timestamp
+        else
+            newTimestamp = data.timestamp
+        end
+
+        local newWidth = calculateFontStringWidth(frame.Timestamp, "[" .. newTimestamp .. "]")
+        frame.Timestamp:SetWidth(newWidth)
+
+        local newHeight = calculateFontStringHeight(frame.Text, data.text)
+        frame.Text:SetHeight(newHeight)
+
+        if(data.old) then
+            frame.Text:SetTextColor(0.4, 0.4, 0.4, 1)
+
+        else
+            frame.Text:SetTextColor(1, 1, 1, 1)
+
+        end
+    else
+        if(data.status == "empty") then
+            frame.Timestamp:SetText("")
+            frame.Text:SetText("")
+        
+        elseif(data.status == "more") then
+            frame.Timestamp:SetText("")
+            frame.Text:SetTextColor(1, 1, 1, 1)
+            frame.Text:SetText("There are more messages...")
+            frame.layoutIndex = -99999999
+            frame:SetScript("OnMouseDown", function()
+                activeChats[data.playerName].lastLoadedLog = activeChats[data.playerName].lastLoadedLog + 10
+
+                checkPlayerForChatFrame(data.playerName, true)
+                
+            end)
+        end
+    end
+end
+
+local function createMainFrame()
+    local realm = GetNormalizedRealmName()
+
+    if(realm) then
+        local shortName, realm2 = UnitFullName("player")
+
+        if(shortName and realm2) then
+            fullPlayerName = shortName .. "-" .. realm2
+
+        else
+            fullPlayerName = UnitName("player") .. "-" .. realm
+        
+        end
+    end
+
     ns.MainFrame = CreateFrame("Frame", "MythicWhispers_MainFrame", UIParent, "MW_MainFrame")
     ns.MainFrame:SetSize(GetScreenWidth() / 6, GetScreenHeight() / 6)
-    createFrameBorder(ns.MainFrame, 2, CreateColorFromHexString("FF3C3D4E"):GetRGBA())
+    ns.createFrameBorder(ns.MainFrame, 2, CreateColorFromHexString("FF3C3D4E"):GetRGBA())
     ns.MainFrame.Background:SetTexture("Interface/Addons/" .. addonName .. "/res/backgrounds/df-bg-1_small.png")
     ns.MainFrame.LogBox.Background:SetTexture("Interface/Addons/" .. addonName .. "/res/backgrounds/df-bg-1_small.png")
+
+    ns.MainFrame.ChatButtonScrollFrame.ScrollBar:Hide()
 
 	if(ns.MainFrame:GetPoint() == nil) then
 		ns.MainFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", GetScreenWidth() / 6, - GetScreenHeight() / 6)
@@ -422,10 +381,12 @@ local function xyz()
     ScrollView:SetElementInitializer("MW_ChatLineTemplate", Initializer)
     ScrollView:SetElementExtentCalculator(function(index, data)
         return calculateElementExtent(index, data)
+        --calculateFontStringHeight
     end)
-    ScrollView:SetPadding(4, 2, 2, 2, 4)
 
     ns.MainFrame.ScrollView = ScrollView
+
+    --ScrollView:SetPadding(4, 2, 2, 2, 4)
     
     local logScrollView = CreateScrollBoxListLinearView()
 
@@ -434,17 +395,7 @@ local function xyz()
     logScrollView:SetElementInitializer("MW_LogLineTemplate", function(frame, data)
         frame.Name:SetText(wticc(data.name, C_ClassColor.GetClassColor(MW_ChatLogs[data.name].class):GenerateHexColor()))
         frame:SetScript("OnMouseDown", function()
-            if(not activeChats[data.name]) then
-                createNewChatFrame(data.name, class)
-
-            end
-            
-            if(#ns.MainFrame.ChatButtonScrollFrame.ChatButtonContainer:GetLayoutChildren() > 1) then
-                loadChatFrame(data.name, true, true)
-            
-            end
-
-            jumpToChatButton(data.name)
+            checkPlayerForChatFrame(data.name, true)
         end)
     end)
     logScrollView:SetPadding(2, 2, 2, 2, 4)
@@ -479,38 +430,12 @@ local function xyz()
         end
     end)
 
-    ns.MainFrame.RightClickMenu:OnLoad()
-    ns.MainFrame.RightClickMenu:SetRightClickMenuMode()
+    ns.MainFrame.DataProvider = CreateDataProvider()
 
-    ns.MainFrame.ChatButtonScrollFrame.ScrollBar:Hide()
-
-    ns.MainFrame.CycleLeft:Disable()
-    ns.MainFrame.CycleRight:Disable()
-    
-    ns.MainFrame.CycleLeft:SetScript("OnClick", function()
-        local children = ns.MainFrame.ChatButtonScrollFrame.ChatButtonContainer:GetLayoutChildren()
-
-        for k, v in ipairs(children) do
-            if(v.fullName == currentWhisper) then
-                print(v.fullName)
-                jumpToChatButton(children[k - 1].fullName)
-            end
-        end
-    end)
-    
-    ns.MainFrame.CycleRight:SetScript("OnClick", function()
-        local children = ns.MainFrame.ChatButtonScrollFrame.ChatButtonContainer:GetLayoutChildren()
-
-        for k, v in ipairs(children) do
-            if(v.fullName == currentWhisper) then
-                jumpToChatButton(children[k + 1].fullName)
-            end
-        end
-    end)
-
-    framePool = CreateFramePool("Frame", ns.MainFrame, "MW_ChatButton", function(_, frame)
+    framePool = CreateFramePool("Frame", ns.MainFrame.ChatButtonScrollFrame.Container, "MW_ChatButton", function(_, frame)
         frame:Hide()
         frame.BackgroundSelected:Hide()
+        frame.BackgroundHighlight:Hide()
         frame.layoutIndex = nil
 
         frame.Name:SetText("")
@@ -521,6 +446,21 @@ local function xyz()
         frame.lastLoadedLog = nil
 
         frame:SetScript("OnMouseDown", nil)
+    end)
+
+    ns.MainFrame.Status.WhitelistButton:SetScript("OnClick", function()
+        MW_ChatLogs[currentWhisper].whitelisted = true
+        ns.MainFrame.ScrollBox:Show()
+
+        ns.MainFrame.Status:Hide()
+    end)
+
+    ns.MainFrame.Status.DeleteButton:SetScript("OnClick", function()
+        MW_ChatLogs[currentWhisper] = nil
+        ns.MainFrame.DataProvider:Flush()
+        ns.MainFrame.ScrollBox:Show()
+
+        closeChat(currentWhisper)
     end)
 
 end
@@ -550,7 +490,7 @@ end
 
 local function mainEvents(_, event, ...)
 	if(event == "PLAYER_LOGIN") then
-        xyz()
+        createMainFrame()
 
 		if(C_AddOns.IsAddOnLoaded("RaiderIO")) then
 			ns.F.IS_RAIDERIO_LOADED = true
@@ -562,41 +502,41 @@ local function mainEvents(_, event, ...)
         end
 
     elseif(event == "CHAT_MSG_WHISPER") then
-        local text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, languageID, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, supressRaidIcons = ...
+        local text, senderName, languageName, channelName, targetName, specialFlags, zoneChannelID, channelIndex, channelBaseName, languageID, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, supressRaidIcons = ...
         local localizedClass, englishClass, localizedRace, englishRace, sex, name, realmName = GetPlayerInfoByGUID(guid)
 
-        if(not MW_ChatLogs[playerName]) then
-            MW_ChatLogs[playerName] = {class = englishClass, race = englishRace, logs = {}}
+        local logPlayerName = fullPlayerName ~= senderName and senderName or targetName or fullPlayerName
+
+        if(not MW_ChatLogs[logPlayerName]) then
+            MW_ChatLogs[logPlayerName] = {class = englishClass, race = englishRace, logs = {}}
             
             if(ns.MainFrame.LogBox:IsShown()) then
-                ns.MainFrame.LogBox.dataProvider:Insert({name = playerName})
+                ns.MainFrame.LogBox.dataProvider:Insert({name = logPlayerName})
             end
 
         end
 
-        local newChat = not activeChats[playerName]
-
-        if(newChat) then
-            createNewChatFrame(playerName)
-        
-        end
+        MW_ChatLogs[logPlayerName].specialText = ns.getPFlag(specialFlags, zoneChannelID)
+        MW_ChatLogs[logPlayerName].lastMessageSeen = false
+        MW_ChatLogs[logPlayerName].isFriend = C_FriendList.IsFriend(guid)
 
         local data = {timestamp = date("%H:%M:%S"), day = date("%d"), month = date("%m"), year = date("%y"), text = text}
-        table.insert(MW_ChatLogs[playerName].logs, data)
 
-        if(not newChat) then
-            addNewestMessageToChat(playerName, data)
-        end
+        if(senderName == fullPlayerName) then
+            data.type = "out"
 
-        addButtonTooltip(playerName, specialFlags)
-
-        if(InCombatLockdown()) then
-            whisperDuringCombat = true
-            
         else
-            ns.MainFrame:Show()
+            data.type = "in"
         
         end
+
+        table.insert(MW_ChatLogs[logPlayerName].logs, data)
+
+        checkPlayerForChatFrame(logPlayerName)
+
+        --PlaySound(SOUNDKIT.TELL_MESSAGE);
+
+        addButtonTooltip(logPlayerName, specialFlags)
     elseif(event == "PLAYER_REGEN_DISABLED") then
         ns.MainFrame:Hide()
 

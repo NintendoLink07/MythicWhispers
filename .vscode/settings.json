@@ -16,6 +16,9 @@
         "CreateTexturePool",
         "ITEM_QUALITY_COLORS",
         "GameTooltip_AddBlankLineToTooltip",
-        "SlashCmdList"
+        "SlashCmdList",
+        "NPEV2_CHAT_USER_TAG_GUIDE",
+        "NPEV2_CHAT_USER_TAG_NEWCOMER",
+        "ChatFrame_GetMentorChannelStatus"
     ]
 }

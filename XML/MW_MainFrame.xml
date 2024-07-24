@@ -73,70 +73,24 @@
                 </Scripts>
             </Button>
             
-            <Button parentKey="CycleRight">
-                <Size x="20" y="20"/>
-
-                <NormalTexture atlas="wowlabs-spectatecycling-arrowright" />
-                <DisabledTexture atlas="wowlabs-spectatecycling-arrowright_disabled" />
-
-                <Anchors>
-                    <Anchor point="RIGHT" relativeKey="$parent.Settings" relativePoint="LEFT" x="-1"/>
-                </Anchors>
-
-                <Scripts>
-                    <OnClick>
-                        if(self:GetParent().ChatButtonScrollFrame:GetHorizontalScroll() + 30 > self:GetParent().ChatButtonScrollFrame:GetHorizontalScrollRange()) then
-                            self:GetParent().ChatButtonScrollFrame:SetHorizontalScroll(self:GetParent().ChatButtonScrollFrame:GetHorizontalScrollRange())
-
-                        else
-                            self:GetParent().ChatButtonScrollFrame:SetHorizontalScroll(self:GetParent().ChatButtonScrollFrame:GetHorizontalScroll() + 30)
-
-                        end
-                    </OnClick>
-                </Scripts>
-            </Button>
-            
-            <Button parentKey="CycleLeft">
-                <Size x="20" y="20"/>
-
-                <NormalTexture atlas="wowlabs-spectatecycling-arrowleft" />
-                <DisabledTexture atlas="wowlabs-spectatecycling-arrowleft_disabled" />
-
-                <Anchors>
-                    <Anchor point="RIGHT" relativeKey="$parent.CycleRight" relativePoint="LEFT" x="-1"/>
-                </Anchors>
-
-                <Scripts>
-                    <OnClick>
-                        if(0 > self:GetParent().ChatButtonScrollFrame:GetHorizontalScroll() - 30) then
-                            self:GetParent().ChatButtonScrollFrame:SetHorizontalScroll(0)
-
-                        else
-                            self:GetParent().ChatButtonScrollFrame:SetHorizontalScroll(self:GetParent().ChatButtonScrollFrame:GetHorizontalScroll() - 30)
-
-                        end
-                    </OnClick>
-                </Scripts>
-            </Button>
-            
             <ScrollFrame parentKey="ChatButtonScrollFrame" inherits="ScrollFrameTemplate">
                 <Size y="21" />
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="2" y="-1"/>
-                    <Anchor point="TOPRIGHT" relativeKey="$parent.CycleLeft" relativePoint="TOPLEFT" x="-2" y="-1"/>
+                    <Anchor point="TOPRIGHT" relativeKey="$parent.Settings" relativePoint="TOPLEFT" x="-2" y="-1"/>
                 </Anchors>
 
                 <ScrollChild>
-                    <Frame parentKey="ChatButtonContainer" inherits="HorizontalLayoutFrame, BackdropTemplate">
+                    <Frame parentKey="Container" inherits="HorizontalLayoutFrame, BackdropTemplate">
                         <KeyValues>
                             <KeyValue key="fixedHeight" value="21" type="number" />
                         </KeyValues>
 
                         <Anchors>
                             <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="2" y="-1"/>
-                            <Anchor point="TOPRIGHT" relativeKey="$parent.CycleLeft" relativePoint="TOPLEFT" x="-2" y="-1"/>
+                            <Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-2" y="-1"/>
                         </Anchors>
-                    </Frame>w
+                    </Frame>
                 </ScrollChild>
             </ScrollFrame>
 
@@ -151,7 +105,7 @@
 
             <Frame parentKey="ScrollBox" inherits="WoWScrollBoxList">
                 <Anchors>
-                    <Anchor point="TOPLEFT" relativeKey="$parent.ChatButtonScrollFrame" relativePoint="BOTTOMLEFT" x="´0" y="-3"/>
+                    <Anchor point="TOPLEFT" relativeKey="$parent.ChatButtonScrollFrame" relativePoint="BOTTOMLEFT" x="0" y="-3"/>
                     <Anchor point="BOTTOMRIGHT" relativeKey="$parent.ChatBox" relativePoint="TOPRIGHT" x="-20" y="3"/>
                 </Anchors>
             </Frame>
@@ -179,6 +133,59 @@
 
             <Frame parentKey="RightClickMenu" inherits="MIOG_DropDownMenu" mixin="SlickDropDown">
                 <Size x="120" y="22" />
+            </Frame>
+
+            <Frame parentKey="Status" frameStrata="FULLSCREEN" hidden="true">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeKey="$parent.ScrollBox" relativePoint="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeKey="$parent.ScrollBox" relativePoint="BOTTOMRIGHT" />
+                </Anchors>
+
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <Texture parentKey="Background" setAllPoints="true">
+                            <Color r="0.1" g="0.1" b="0.1" a="0.93"/>
+                        </Texture>
+                    </Layer>
+
+                    <Layer level="OVERLAY">
+                        <FontString parentKey="FontString" font="SystemFont_Shadow_Med1" justifyH="CENTER" wordwrap="true" nonspacewrap="true" text="You've received a whisper from a non-friend, do you want to display the message?">
+                            <Anchors>
+                                <Anchor point="TOP" relativeKey="$parent.Background" relativePoint="TOP" y="-20"/>
+                                <Anchor point="LEFT" relativeKey="$parent.Background" relativePoint="LEFT"/>
+                                <Anchor point="RIGHT" relativeKey="$parent.Background" relativePoint="RIGHT"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+
+                <Frames>
+                    <Button parentKey="DisplayButton" inherits="UIPanelDynamicResizeButtonTemplate" text="Display">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeKey="$parent" relativePoint="LEFT"/>
+                        </Anchors>
+
+                        <Scripts>
+                            <OnClick>
+                                self:GetParent():GetParent().ScrollBox:Show()
+                                self:GetParent():Hide()
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+
+                    <Button parentKey="DeleteButton" inherits="UIPanelDynamicResizeButtonTemplate" text="Delete">
+                        <Anchors>
+                            <Anchor point="RIGHT" relativeKey="$parent" relativePoint="RIGHT"/>
+                        </Anchors>
+                    </Button>
+
+                    <Button parentKey="WhitelistButton" inherits="UIPanelDynamicResizeButtonTemplate" text="Whitelist and Display">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeKey="$parent.DisplayButton" relativePoint="RIGHT"/>
+                            <Anchor point="RIGHT" relativeKey="$parent.DeleteButton" relativePoint="LEFT"/>
+                        </Anchors>
+                    </Button>
+                </Frames>
             </Frame>
         </Frames>
 

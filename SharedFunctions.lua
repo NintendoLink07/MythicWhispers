@@ -54,6 +54,38 @@ ns.COLOR_BREAKPOINTS = {
 	[6] = {breakpoint = 4200, hex = "ffe6cc80", r = 0.9, g = 0.8, b = 0.5},
 }
 
+local function createFrameBorder(frame, thickness, r, g, b, a)
+	frame:SetBackdrop( { bgFile="Interface\\ChatFrame\\ChatFrameBackground", tileSize=20, tile=false, edgeFile="Interface\\ChatFrame\\ChatFrameBackground", edgeSize = thickness} )
+	frame:SetBackdropColor(0, 0, 0, 0) -- main area color
+	frame:SetBackdropBorderColor(r or random(0, 1), g or random(0, 1), b or random(0, 1), a or 1) -- border color
+
+end
+
+ns.createFrameBorder = createFrameBorder
+
+local function GetPFlag(specialFlag, zoneChannelID, localChannelID)
+	if specialFlag ~= "" then
+		if specialFlag == "GM" or specialFlag == "DEV" then
+			-- Add Blizzard Icon if  this was sent by a GM/DEV
+			return "|TInterface\\ChatFrame\\UI-ChatIcon-Blizz:12:20:0:0:32:16:4:28:0:16|t ";
+		elseif specialFlag == "GUIDE" then
+			if ChatFrame_GetMentorChannelStatus(Enum.PlayerMentorshipStatus.Mentor, C_ChatInfo.GetChannelRulesetForChannelID(zoneChannelID)) == Enum.PlayerMentorshipStatus.Mentor then
+				return NPEV2_CHAT_USER_TAG_GUIDE .. " "; -- possibly unable to save global string with trailing whitespace...
+			end
+		elseif specialFlag == "NEWCOMER" then
+			if ChatFrame_GetMentorChannelStatus(Enum.PlayerMentorshipStatus.Newcomer, C_ChatInfo.GetChannelRulesetForChannelID(zoneChannelID)) == Enum.PlayerMentorshipStatus.Newcomer then
+				return NPEV2_CHAT_USER_TAG_NEWCOMER;
+			end
+		else
+			return _G["CHAT_FLAG_"..specialFlag];
+		end
+	end
+
+	return "";
+end
+
+ns.getPFlag = GetPFlag
+
 local function calculateWeightedScore(difficulty, kills, bossCount, current, ordinal)
 	return (ns.WEIGHTS_TABLE[current and 1 or 2] * difficulty + ns.WEIGHTS_TABLE[current and 2 or 3] * kills / bossCount) + (ns.WEIGHTS_TABLE[current and 1 or 2] * difficulty + ns.WEIGHTS_TABLE[current and 2 or 3] * kills / bossCount)
 

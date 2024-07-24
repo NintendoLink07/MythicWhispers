@@ -1,4 +1,4 @@
-## Interface: 100207
+## Interface: 110002, 110000
 ## Title: MythicWhispers
 ## Author: Rhany-Ravencrest
 ## Notes: The new standard for WoW /w chats

@@ -16,6 +16,7 @@
             <Layer level="BACKGROUND">
                 <Texture parentKey="Background" atlas="pvpqueue-button-casual-up" setAllPoints="true" />
                 <Texture parentKey="BackgroundSelected" atlas="pvpqueue-button-casual-highlight" alphaMode="ADD" setAllPoints="true" hidden="true" />
+                <Texture parentKey="BackgroundHighlight" atlas="pvpqueue-button-casual-selected" alphaMode="ADD" setAllPoints="true" hidden="true" />
             </Layer>
 
             <Layer level="ARTWORK">
