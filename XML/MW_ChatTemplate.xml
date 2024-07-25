@@ -1,8 +1,8 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\..\FrameXML\UI.xsd">
     <Frame name="MW_ChatButton" virtual="true">
-        <Size y="20" />
-        
+        <Size y="25" />
+
         <Frames>
             <Button parentKey="CloseButton" inherits="UIPanelCloseButton">
                 <Size x="14" y="14"/>

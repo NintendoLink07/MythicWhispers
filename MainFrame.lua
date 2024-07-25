@@ -97,10 +97,10 @@ local function closeChat(playerName)
     
     else
         ns.MainFrame.DataProvider:Flush()
+        ns.MainFrame.ChatBox:Hide()
+        ns.MainFrame.Status:Hide()
     
     end
-
-    ns.MainFrame.Status:Hide()
 end
 
 -- --------------------------------------------------------------------------------------------------------------------------------
@@ -181,7 +181,6 @@ end
 local function createChatButton(playerName)
     local chatButton = framePool:Acquire()
     chatButton.layoutIndex = #ns.MainFrame.ChatButtonScrollFrame.Container:GetLayoutChildren() + 1
-    chatButton:SetWidth(50)
     chatButton:Show()
     chatButton.fullName = playerName
     chatButton.lastLoadedLog = 0
@@ -247,6 +246,7 @@ local function checkPlayerForChatFrame(playerName, switchToPlayer)
     if(playerHasNoChatButton) then
         createChatButton(playerName)
     
+        ns.MainFrame.ChatBox:Show()
     end
 
     if(switchToPlayer) then
@@ -281,12 +281,15 @@ local function checkPlayerForChatFrame(playerName, switchToPlayer)
 
     if(not MW_ChatLogs[playerName].isFriend and not MW_ChatLogs[playerName].whitelisted) then
         ns.MainFrame.ScrollBox:Hide()
+        ns.MainFrame.ScrollBar:Hide()
+        ns.MainFrame.Status.FontString:SetText("You've received a whisper from a non-friend (" .. wticc(playerName, C_ClassColor.GetClassColor(MW_ChatLogs[playerName].class):GenerateHexColor()) .. "), do you want to display the message?")
         ns.MainFrame.Status:Show()
 
     else
         ns.MainFrame.ScrollBox:Show()
+        ns.MainFrame.ScrollBar:Show()
         ns.MainFrame.Status:Hide()
-    
+
     end
 
     if(not ns.MainFrame:IsShown() and not InCombatLockdown()) then
@@ -356,7 +359,7 @@ local function createMainFrame()
     end
 
     ns.MainFrame = CreateFrame("Frame", "MythicWhispers_MainFrame", UIParent, "MW_MainFrame")
-    ns.MainFrame:SetSize(GetScreenWidth() / 6, GetScreenHeight() / 6)
+    ns.MainFrame:SetSize(GetScreenWidth() / 3 * UIParent:GetEffectiveScale(), GetScreenHeight() / 3 * UIParent:GetEffectiveScale())
     ns.createFrameBorder(ns.MainFrame, 2, CreateColorFromHexString("FF3C3D4E"):GetRGBA())
     ns.MainFrame.Background:SetTexture("Interface/Addons/" .. addonName .. "/res/backgrounds/df-bg-1_small.png")
     ns.MainFrame.LogBox.Background:SetTexture("Interface/Addons/" .. addonName .. "/res/backgrounds/df-bg-1_small.png")
@@ -451,6 +454,7 @@ local function createMainFrame()
     ns.MainFrame.Status.WhitelistButton:SetScript("OnClick", function()
         MW_ChatLogs[currentWhisper].whitelisted = true
         ns.MainFrame.ScrollBox:Show()
+        ns.MainFrame.ScrollBar:Show()
 
         ns.MainFrame.Status:Hide()
     end)
@@ -459,6 +463,7 @@ local function createMainFrame()
         MW_ChatLogs[currentWhisper] = nil
         ns.MainFrame.DataProvider:Flush()
         ns.MainFrame.ScrollBox:Show()
+        ns.MainFrame.ScrollBar:Show()
 
         closeChat(currentWhisper)
     end)
