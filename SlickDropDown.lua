@@ -10,9 +10,9 @@ local addonName, miog = ...
 SlickDropDown = {}
 
 function SlickDropDown:OnLoad()
-	--self.List.framePool = CreateFramePool("Button", self.List, "PVPCasualActivityButton, MIOG_DropDownMenuEntry, SecureActionButtonTemplate", SlickDropDown.ResetFrame)
-	--self.List.framePool = CreateFramePool("Button", self.List, "PVPCasualActivityButton, MIOG_DropDownMenuEntry", SlickDropDown.ResetFrame)
-	self.List.framePool = CreateFramePool("Button", self.List, "MIOG_DropDownMenuEntry", SlickDropDown.ResetFrame)
+	--self.List.framePool = CreateFramePool("Button", self.List, "PVPCasualActivityButton, MW_DropDownMenuEntry, SecureActionButtonTemplate", SlickDropDown.ResetFrame)
+	--self.List.framePool = CreateFramePool("Button", self.List, "PVPCasualActivityButton, MW_DropDownMenuEntry", SlickDropDown.ResetFrame)
+	self.List.framePool = CreateFramePool("Button", self.List, "MW_DropDownMenuEntry", SlickDropDown.ResetFrame)
 	self.List.fontStringPool = CreateFontStringPool(self.List, "OVERLAY", nil, "GameTooltipText", SlickDropDown.ResetFontString)
 	self.List.texturePool = CreateTexturePool(self.List, "ARTWORK", nil, nil, SlickDropDown.ResetTexture)
 	self.List.buttonPool = CreateFramePool("Button", self.List, "UIButtonTemplate", SlickDropDown.ResetButton)
@@ -564,9 +564,9 @@ function SlickDropDown:CreateEntryFrame(info)
 
 			end
 
-			--list.framePool = list.framePool or CreateFramePool("Button", list, "PVPCasualActivityButton, MIOG_DropDownMenuEntry, SecureActionButtonTemplate", SlickDropDown.ResetFrame)
-			list.framePool = list.framePool or CreateFramePool("Button", list, "MIOG_DropDownMenuEntry", SlickDropDown.ResetFrame)
-			--list.securePool = list.securePool or CreateFramePool("Button", list, "PVPCasualActivityButton, MIOG_DropDownMenuEntry, SecureActionButtonTemplate", SlickDropDown.ResetFrame)
+			--list.framePool = list.framePool or CreateFramePool("Button", list, "PVPCasualActivityButton, MW_DropDownMenuEntry, SecureActionButtonTemplate", SlickDropDown.ResetFrame)
+			list.framePool = list.framePool or CreateFramePool("Button", list, "MW_DropDownMenuEntry", SlickDropDown.ResetFrame)
+			--list.securePool = list.securePool or CreateFramePool("Button", list, "PVPCasualActivityButton, MW_DropDownMenuEntry, SecureActionButtonTemplate", SlickDropDown.ResetFrame)
 
 			frame = list.framePool:Acquire()
 

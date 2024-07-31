@@ -8,44 +8,56 @@
         </Layers>
 
         <Frames>
-            <Frame parentKey="LogBox" inherits="WoWScrollBoxList" hidden="true">
+            <Frame parentKey="LogFrame" inherits="BackdropTemplate" hidden="true">
                 <Size x="200" />
 
                 <Anchors>
-                    <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPRIGHT" x="1" y="-20"/>
-                    <Anchor point="BOTTOMLEFT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" x="1"/>
+                    <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPRIGHT" x="2"/>
+                    <Anchor point="BOTTOMLEFT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" x="2"/>
                 </Anchors>
-                <Frames>
-                    <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPRIGHT" />
-                            <Anchor point="BOTTOMLEFT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" />
-                        </Anchors>
-                    </EventFrame>
-                </Frames>
-                
+                        
                 <Layers>
                     <Layer level="BACKGROUND" textureSubLevel="1">
                         <Texture parentKey="Background" setAllPoints="true" />
                     </Layer>
+
+                    <Layer level="OVERLAY">
+                        <FontString parentKey="FontString" font="SystemFont_Shadow_Med2" justifyH="CENTER" text="Past logs">
+                            <Anchors>
+                                <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" y="-6"/>
+                                <Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" y="-6"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
                 </Layers>
+
+                <Frames>
+                    <Frame parentKey="ScrollBox" inherits="WoWScrollBoxList">
+
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" y="-30"/>
+                            <Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" x="-15"/>
+                        </Anchors>
+                    </Frame>
+
+                    <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativeKey="$parent.ScrollBox" relativePoint="TOPRIGHT" y="-2"/>
+                            <Anchor point="BOTTOMLEFT" relativeKey="$parent.ScrollBox" relativePoint="BOTTOMRIGHT" y="2"/>
+                        </Anchors>
+                    </EventFrame>
+                </Frames>
             </Frame>
 
-            <Button parentKey="LogButton" inherits="UIPanelButtonTemplate">
+            <Button parentKey="LogButton" inherits="UIPanelButtonTemplate" frameStrata="DIALOG">
                 <Size x="20" y="20"/>
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPRIGHT" x="2"/>
                 </Anchors>
-
-                <Scripts>
-                    <OnClick>
-
-                    </OnClick>
-                </Scripts>
             </Button>
 
             <Button parentKey="CloseButton" inherits="UIPanelCloseButton">
-                <Size x="19" y="19"/>
+                <Size x="25" y="25"/>
                 <Anchors>
                     <Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-2" y="-2"/>
                 </Anchors>
@@ -58,7 +70,7 @@
             </Button> 
             
             <Button parentKey="Settings">
-                <Size x="20" y="20"/>
+                <Size x="25" y="25"/>
 
                 <NormalTexture atlas="GM-icon-settings" />
 
@@ -72,22 +84,30 @@
                     </OnClick>
                 </Scripts>
             </Button>
+
+            <Frame parentKey="ActiveChatsDropdown" inherits="MW_DropDownMenu" mixin="SlickDropDown" hidden="true">
+                <Size x="100" y="25" />
+                <Anchors>
+                    <Anchor point="RIGHT" relativeKey="$parent.Settings" relativePoint="LEFT"/>
+                </Anchors>
+            </Frame>
+
+            <DropdownButton parentKey="CurrentChats" inherits="WowStyle1DropdownTemplate">
+                <Size x="100" y="25" />
+                <Anchors>
+                    <Anchor point="RIGHT" relativeKey="$parent.Settings" relativePoint="LEFT"/>
+                </Anchors>
+            </DropdownButton>
             
             <ScrollFrame parentKey="ChatButtonScrollFrame" inherits="ScrollFrameTemplate">
                 <Size y="25" />
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="2" y="-1"/>
-                    <Anchor point="TOPRIGHT" relativeKey="$parent.Settings" relativePoint="TOPLEFT" x="-2" y="-1"/>
+                    <Anchor point="TOPRIGHT" relativeKey="$parent.CurrentChats" relativePoint="TOPLEFT" x="-2" y="-1"/>
                 </Anchors>
 
                 <ScrollChild>
-                    <Frame parentKey="Container" inherits="HorizontalLayoutFrame, BackdropTemplate">
-
-                        <Anchors>
-                            <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="2" y="-1"/>
-                            <Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-2" y="-1"/>
-                        </Anchors>
-                    </Frame>
+                    <Frame parentKey="Container" inherits="HorizontalLayoutFrame, BackdropTemplate" setAllPoints="true" />
                 </ScrollChild>
             </ScrollFrame>
 
@@ -97,7 +117,7 @@
                     <Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" x="-1" y="1"/>
                 </Anchors>
 
-                <Size y="20" />  
+                <Size y="20" />
             </EditBox>
 
             <Frame parentKey="ScrollBox" inherits="WoWScrollBoxList">
@@ -109,14 +129,12 @@
 
             <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
                 <Anchors>
-                    <Anchor point="TOPLEFT" relativeKey="$parent.ScrollBox" relativePoint="TOPRIGHT" />
-                    <Anchor point="BOTTOMLEFT" relativeKey="$parent.ScrollBox" relativePoint="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT" relativeKey="$parent.ScrollBox" relativePoint="TOPRIGHT" x="5"/>
+                    <Anchor point="BOTTOMLEFT" relativeKey="$parent.ScrollBox" relativePoint="BOTTOMRIGHT" x="5"/>
                 </Anchors>
             </EventFrame>
 
-            <EditBox parentKey="CopyBox" inherits="InputBoxTemplate" framestrata="FULLSCREEN" autoFocus="false" font="SystemFont_Shadow_Med1">
-                <Size y="20" />   
-                
+            <EditBox parentKey="CopyBox" inherits="InputBoxTemplate" framestrata="FULLSCREEN" autoFocus="false" font="SystemFont_Shadow_Med1">                
                 <Scripts>
                     <OnKeyDown>
                         if(key == "ESCAPE" or key == "ENTER") then
@@ -128,11 +146,11 @@
                 </Scripts>
             </EditBox>
 
-            <Frame parentKey="RightClickMenu" inherits="MIOG_DropDownMenu" mixin="SlickDropDown">
+            <Frame parentKey="RightClickMenu" inherits="MW_DropDownMenu" mixin="SlickDropDown">
                 <Size x="120" y="22" />
             </Frame>
 
-            <Frame parentKey="Status" frameStrata="FULLSCREEN" hidden="true">
+            <Frame parentKey="Status" frameStrata="HIGH" hidden="true">
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeKey="$parent.ScrollBox" relativePoint="TOPLEFT"/>
                     <Anchor point="BOTTOMRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" />

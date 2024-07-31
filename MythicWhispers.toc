@@ -3,6 +3,7 @@
 ## Author: Rhany-Ravencrest
 ## Notes: The new standard for WoW /w chats
 ## Version: 0.0.3
+## IconTexture: Interface\AddOns\MythicWhispers\res\infoIcons\logo_noText_128.png
 ## SavedVariables: MW_SavedSettings, MW_ChatLogs
 ## AddonCompartmentFunc: MW_OpenInterfaceOptions
 
@@ -14,5 +15,5 @@ XML/MW_MainFrame.xml
 XML/MW_ChatTemplate.xml
 XML/MW_LogLineTemplate.xml
 
-XML/MIOG_DropDownMenu.xml
-XML/MIOG_DropDownMenuEntry.xml
+XML/MW_DropDownMenu.xml
+XML/MW_DropDownMenuEntry.xml

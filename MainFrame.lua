@@ -179,8 +179,9 @@ local function addButtonTooltip(playerName, specialFlags)
 end
 
 local function createChatButton(playerName)
+    local newIndex = #ns.MainFrame.ChatButtonScrollFrame.Container:GetLayoutChildren() + 1
     local chatButton = framePool:Acquire()
-    chatButton.layoutIndex = #ns.MainFrame.ChatButtonScrollFrame.Container:GetLayoutChildren() + 1
+    chatButton.layoutIndex = newIndex
     chatButton:Show()
     chatButton.fullName = playerName
     chatButton.lastLoadedLog = 0
@@ -239,6 +240,26 @@ local function loadLastLogs(playerName)
     end
 end
 
+local function scrollToFrame(playerName)
+    local scrollframeWidth = ns.MainFrame.ChatButtonScrollFrame:GetWidth()
+    local maxRange = scrollframeWidth + ns.MainFrame.ChatButtonScrollFrame:GetHorizontalScrollRange()
+    local currentScroll = 0
+
+    local before1, before2 = 0, 0
+
+    local children = ns.MainFrame.ChatButtonScrollFrame.Container:GetLayoutChildren()
+
+    for k, v in ipairs(children) do
+        currentScroll = currentScroll + v:GetWidth()
+
+        if(v.fullName == playerName) then
+            ns.MainFrame.ChatButtonScrollFrame:SetHorizontalScroll(currentScroll >= scrollframeWidth and currentScroll - scrollframeWidth or 0)
+            break
+
+        end
+    end
+end
+
 local function checkPlayerForChatFrame(playerName, switchToPlayer)
     switchToPlayer = switchToPlayer or #ns.MainFrame.ChatButtonScrollFrame.Container:GetLayoutChildren() == 0
     local playerHasNoChatButton = not activeChats[playerName]
@@ -254,6 +275,7 @@ local function checkPlayerForChatFrame(playerName, switchToPlayer)
         
         if(currentWhisper) then
             activeChats[currentWhisper].BackgroundSelected:Hide()
+            activeChats[currentWhisper].BackgroundHighlight:Hide()
 
         end
 
@@ -264,6 +286,19 @@ local function checkPlayerForChatFrame(playerName, switchToPlayer)
         --end
 
         currentWhisper = playerName
+
+        if(not MW_ChatLogs[playerName].isFriend and not MW_ChatLogs[playerName].whitelisted) then
+            ns.MainFrame.ScrollBox:Hide()
+            ns.MainFrame.ScrollBar:Hide()
+            ns.MainFrame.Status.FontString:SetText("You've received a whisper from a non-friend (" .. wticc(playerName, C_ClassColor.GetClassColor(MW_ChatLogs[playerName].class):GenerateHexColor()) .. "), do you want to display the message?")
+            ns.MainFrame.Status:Show()
+    
+        else
+            ns.MainFrame.ScrollBox:Show()
+            ns.MainFrame.ScrollBar:Show()
+            ns.MainFrame.Status:Hide()
+    
+        end
     end
 
     if(currentWhisper == playerName) then
@@ -271,6 +306,7 @@ local function checkPlayerForChatFrame(playerName, switchToPlayer)
         ns.MainFrame.ScrollBox:ScrollToEnd()
 
         MW_ChatLogs[playerName].lastMessageSeen = true
+        activeChats[playerName].BackgroundHighlight:Hide()
         
     else
         activeChats[playerName].BackgroundHighlight:Show()
@@ -279,23 +315,12 @@ local function checkPlayerForChatFrame(playerName, switchToPlayer)
 
     ns.MainFrame.ScrollView:SetDataProvider(ns.MainFrame.DataProvider)
 
-    if(not MW_ChatLogs[playerName].isFriend and not MW_ChatLogs[playerName].whitelisted) then
-        ns.MainFrame.ScrollBox:Hide()
-        ns.MainFrame.ScrollBar:Hide()
-        ns.MainFrame.Status.FontString:SetText("You've received a whisper from a non-friend (" .. wticc(playerName, C_ClassColor.GetClassColor(MW_ChatLogs[playerName].class):GenerateHexColor()) .. "), do you want to display the message?")
-        ns.MainFrame.Status:Show()
-
-    else
-        ns.MainFrame.ScrollBox:Show()
-        ns.MainFrame.ScrollBar:Show()
-        ns.MainFrame.Status:Hide()
-
-    end
-
     if(not ns.MainFrame:IsShown() and not InCombatLockdown()) then
 
         ns.MainFrame:Show()
     end
+
+    scrollToFrame(playerName)
 end
 
 ns.checkPlayerForChatFrame = checkPlayerForChatFrame
@@ -305,16 +330,28 @@ local function Initializer(frame, data)
         local newTimestamp
 
         if(date("%d") ~= data.day or date("%m") ~= data.month) then
+            frame.Timestamp:SetWidth(105)
             newTimestamp = data.day .. "/" .. data.month .. " " .. data.timestamp
         else
+            frame.Timestamp:SetWidth(65)
             newTimestamp = data.timestamp
         end
 
-        local newWidth = calculateFontStringWidth(frame.Timestamp, "[" .. newTimestamp .. "]")
-        frame.Timestamp:SetWidth(newWidth)
+        --local newWidth = calculateFontStringWidth(frame.Timestamp, "[" .. newTimestamp .. "]")
+        --frame.Timestamp:SetWidth(newWidth)
+
+        frame.Timestamp:SetText("[" .. newTimestamp .. "]")
 
         local newHeight = calculateFontStringHeight(frame.Text, data.text)
         frame.Text:SetHeight(newHeight)
+
+        if(data.type == "in") then
+            frame.Background:SetColorTexture(0.85, 0.85, 0.85, 0.1)
+
+        else
+            frame.Background:SetColorTexture(0.3, 0.3, 0.3, 0.1)
+
+        end
 
         if(data.old) then
             frame.Text:SetTextColor(0.4, 0.4, 0.4, 1)
@@ -323,6 +360,14 @@ local function Initializer(frame, data)
             frame.Text:SetTextColor(1, 1, 1, 1)
 
         end
+
+        frame.Timestamp:SetScript("OnMouseDown", function()
+            ns.MainFrame.CopyBox:SetText(data.text)
+            ns.MainFrame.CopyBox:SetPoint("TOPLEFT", frame.Text, "TOPLEFT", 3, 0)
+            ns.MainFrame.CopyBox:SetPoint("BOTTOMRIGHT", frame.Text, "BOTTOMRIGHT", -3, 0)
+            ns.MainFrame.CopyBox:Show()
+            ns.MainFrame.CopyBox:SetFocus()
+        end)
     else
         if(data.status == "empty") then
             frame.Timestamp:SetText("")
@@ -338,6 +383,7 @@ local function Initializer(frame, data)
 
                 checkPlayerForChatFrame(data.playerName, true)
                 
+                ns.MainFrame.ScrollBox:ScrollToBegin()
             end)
         end
     end
@@ -361,10 +407,12 @@ local function createMainFrame()
     ns.MainFrame = CreateFrame("Frame", "MythicWhispers_MainFrame", UIParent, "MW_MainFrame")
     ns.MainFrame:SetSize(GetScreenWidth() / 3 * UIParent:GetEffectiveScale(), GetScreenHeight() / 3 * UIParent:GetEffectiveScale())
     ns.createFrameBorder(ns.MainFrame, 2, CreateColorFromHexString("FF3C3D4E"):GetRGBA())
+    ns.createFrameBorder(ns.MainFrame.LogFrame, 2, CreateColorFromHexString("FF3C3D4E"):GetRGBA())
     ns.MainFrame.Background:SetTexture("Interface/Addons/" .. addonName .. "/res/backgrounds/df-bg-1_small.png")
-    ns.MainFrame.LogBox.Background:SetTexture("Interface/Addons/" .. addonName .. "/res/backgrounds/df-bg-1_small.png")
+    ns.MainFrame.LogFrame.Background:SetTexture("Interface/Addons/" .. addonName .. "/res/backgrounds/df-bg-1_small.png")
 
     ns.MainFrame.ChatButtonScrollFrame.ScrollBar:Hide()
+    ns.MainFrame.CopyBox:SetMultiLine(true)
 
 	if(ns.MainFrame:GetPoint() == nil) then
 		ns.MainFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", GetScreenWidth() / 6, - GetScreenHeight() / 6)
@@ -379,12 +427,14 @@ local function createMainFrame()
     end)
 
     local ScrollView = CreateScrollBoxListLinearView()
+    ScrollView:SetPadding(0, 0, 0, 0, 2)
     ScrollUtil.InitScrollBoxListWithScrollBar(ns.MainFrame.ScrollBox, ns.MainFrame.ScrollBar, ScrollView)
+
+    ns.MainFrame.ScrollBar:SetHideIfUnscrollable(true)
 
     ScrollView:SetElementInitializer("MW_ChatLineTemplate", Initializer)
     ScrollView:SetElementExtentCalculator(function(index, data)
         return calculateElementExtent(index, data)
-        --calculateFontStringHeight
     end)
 
     ns.MainFrame.ScrollView = ScrollView
@@ -393,7 +443,9 @@ local function createMainFrame()
     
     local logScrollView = CreateScrollBoxListLinearView()
 
-    ScrollUtil.InitScrollBoxListWithScrollBar(ns.MainFrame.LogBox, ns.MainFrame.LogBox.ScrollBar, logScrollView)
+    ScrollUtil.InitScrollBoxListWithScrollBar(ns.MainFrame.LogFrame.ScrollBox, ns.MainFrame.LogFrame.ScrollBar, logScrollView)
+
+    ns.MainFrame.LogFrame.ScrollBar:SetHideIfUnscrollable(true)
 
     logScrollView:SetElementInitializer("MW_LogLineTemplate", function(frame, data)
         frame.Name:SetText(wticc(data.name, C_ClassColor.GetClassColor(MW_ChatLogs[data.name].class):GenerateHexColor()))
@@ -401,10 +453,10 @@ local function createMainFrame()
             checkPlayerForChatFrame(data.name, true)
         end)
     end)
-    logScrollView:SetPadding(2, 2, 2, 2, 4)
+    logScrollView:SetPadding(2, 2, 4, 4, 2)
 
     ns.MainFrame.LogButton:SetScript("OnClick", function(self, button)
-        if(not ns.MainFrame.LogBox:IsShown()) then
+        if(not ns.MainFrame.LogFrame:IsShown()) then
             local alphabeticallyOrderedList = {}
 
             for k in pairs(MW_ChatLogs) do
@@ -416,19 +468,19 @@ local function createMainFrame()
                 return k1 < k2
             end)
 
-            ns.MainFrame.LogBox.dataProvider = CreateDataProvider()
+            ns.MainFrame.LogFrame.ScrollBox.dataProvider = CreateDataProvider()
 
             for _, v in pairs(alphabeticallyOrderedList) do
-                ns.MainFrame.LogBox.dataProvider:Insert({name = v})
+                ns.MainFrame.LogFrame.ScrollBox.dataProvider:Insert({name = v})
 
             end
 
-            logScrollView:SetDataProvider(ns.MainFrame.LogBox.dataProvider)
+            logScrollView:SetDataProvider(ns.MainFrame.LogFrame.ScrollBox.dataProvider)
 
-            ns.MainFrame.LogBox:Show()
+            ns.MainFrame.LogFrame:Show()
 
         else
-            ns.MainFrame.LogBox:Hide()
+            ns.MainFrame.LogFrame:Hide()
         
         end
     end)
@@ -468,6 +520,26 @@ local function createMainFrame()
         closeChat(currentWhisper)
     end)
 
+    --ns.MainFrame.CurrentChats:SetDefaultText("")
+    ns.MainFrame.CurrentChats:SetupMenu(function(dropdown, rootDescription)
+        local alphabeticallyOrderedList = {}
+
+        for k in pairs(activeChats) do
+            alphabeticallyOrderedList[#alphabeticallyOrderedList+1] = k
+
+        end
+
+        table.sort(alphabeticallyOrderedList, function(k1, k2)
+            return k1 < k2
+        end)
+
+        for k, v in ipairs(alphabeticallyOrderedList) do
+            rootDescription:CreateButton(v, function() ns.checkPlayerForChatFrame(v, true) end)
+
+        end
+    end)
+
+
 end
 
 local function checkOnlineStatus()
@@ -505,18 +577,16 @@ local function mainEvents(_, event, ...)
         if(not MW_ChatLogs) then
             MW_ChatLogs = {}
         end
-
-    elseif(event == "CHAT_MSG_WHISPER") then
-        local text, senderName, languageName, channelName, targetName, specialFlags, zoneChannelID, channelIndex, channelBaseName, languageID, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, supressRaidIcons = ...
-        local localizedClass, englishClass, localizedRace, englishRace, sex, name, realmName = GetPlayerInfoByGUID(guid)
-
-        local logPlayerName = fullPlayerName ~= senderName and senderName or targetName or fullPlayerName
+    
+    elseif(event == "CHAT_MSG_WHISPER_INFORM") then
+        local text, playerName, languageName, channelName, logPlayerName, specialFlags, zoneChannelID, channelIndex, channelBaseName, languageID, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, supressRaidIcons = ...
+        --local localizedClass, englishClass, localizedRace, englishRace, sex, name, realmName = GetPlayerInfoByGUID(guid)
 
         if(not MW_ChatLogs[logPlayerName]) then
-            MW_ChatLogs[logPlayerName] = {class = englishClass, race = englishRace, logs = {}}
+            MW_ChatLogs[logPlayerName] = {logs = {}}
             
-            if(ns.MainFrame.LogBox:IsShown()) then
-                ns.MainFrame.LogBox.dataProvider:Insert({name = logPlayerName})
+            if(ns.MainFrame.LogFrame:IsShown()) then
+                ns.MainFrame.LogFrame.dataProvider:Insert({name = logPlayerName})
             end
 
         end
@@ -525,21 +595,41 @@ local function mainEvents(_, event, ...)
         MW_ChatLogs[logPlayerName].lastMessageSeen = false
         MW_ChatLogs[logPlayerName].isFriend = C_FriendList.IsFriend(guid)
 
-        local data = {timestamp = date("%H:%M:%S"), day = date("%d"), month = date("%m"), year = date("%y"), text = text}
-
-        if(senderName == fullPlayerName) then
-            data.type = "out"
-
-        else
-            data.type = "in"
-        
-        end
+        local data = {timestamp = date("%H:%M:%S"), day = date("%d"), month = date("%m"), year = date("%y"), text = text, type="out"}
 
         table.insert(MW_ChatLogs[logPlayerName].logs, data)
 
         checkPlayerForChatFrame(logPlayerName)
 
         --PlaySound(SOUNDKIT.TELL_MESSAGE);
+
+        addButtonTooltip(logPlayerName, specialFlags)
+
+    elseif(event == "CHAT_MSG_WHISPER") then
+        local text, logPlayerName, languageName, channelName, targetName, specialFlags, zoneChannelID, channelIndex, channelBaseName, languageID, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, supressRaidIcons = ...
+        local localizedClass, englishClass, localizedRace, englishRace, sex, name, realmName = GetPlayerInfoByGUID(guid)
+
+        MW_ChatLogs[logPlayerName].class = englishClass
+        MW_ChatLogs[logPlayerName].race = englishRace
+
+        if(not MW_ChatLogs[logPlayerName]) then
+            MW_ChatLogs[logPlayerName] = {logs = {}}
+            
+            if(ns.MainFrame.LogFrame:IsShown()) then
+                ns.MainFrame.LogFrame.dataProvider:Insert({name = logPlayerName})
+            end
+
+        end
+
+        MW_ChatLogs[logPlayerName].specialText = ns.getPFlag(specialFlags, zoneChannelID)
+        MW_ChatLogs[logPlayerName].lastMessageSeen = false
+        MW_ChatLogs[logPlayerName].isFriend = C_FriendList.IsFriend(guid)
+
+        local data = {timestamp = date("%H:%M:%S"), day = date("%d"), month = date("%m"), year = date("%y"), text = text, type="in"}
+
+        table.insert(MW_ChatLogs[logPlayerName].logs, data)
+
+        checkPlayerForChatFrame(logPlayerName)
 
         addButtonTooltip(logPlayerName, specialFlags)
     elseif(event == "PLAYER_REGEN_DISABLED") then
@@ -566,6 +656,7 @@ eventReceiver:RegisterEvent("PLAYER_REGEN_DISABLED")
 eventReceiver:RegisterEvent("PLAYER_REGEN_ENABLED")
 eventReceiver:RegisterEvent("WHO_LIST_UPDATE")
 eventReceiver:RegisterEvent("CHAT_MSG_WHISPER")
+eventReceiver:RegisterEvent("CHAT_MSG_WHISPER_INFORM")
 eventReceiver:RegisterEvent("CHAT_MSG_SYSTEM")
 eventReceiver:SetScript("OnEvent", mainEvents)
 

@@ -55,29 +55,27 @@
         <Layers>
             <Layer level="OVERLAY">
                 <FontString parentKey="Timestamp" font="SystemFont_Shadow_Med1" justifyH="LEFT" justifyV="MIDDLE" outline="NORMAL" text="[TIME]">
-                    <Size x="80" />
+                    <Size x="65" />
                     <Anchors>
-                        <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" />
+                        <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT" x="1"/>
                     </Anchors>
-
-                    <Scripts>
-                        <OnMouseDown>
-                            local copybox = self:GetParent():GetParent():GetParent():GetParent():GetParent().CopyBox
-                            copybox:SetText(self:GetParent().Text:GetText())
-                            copybox:SetSize(self:GetParent().Text:GetWidth() - 3, self:GetParent().Text:GetHeight())
-                            copybox:SetPoint("TOPLEFT", self, "TOPRIGHT", 3, 0)
-                            copybox:Show()
-                            copybox:SetFocus()
-                        </OnMouseDown>
-                    </Scripts>
                 </FontString>
 
                 <FontString parentKey="Text" font="SystemFont_Shadow_Med1" justifyH="LEFT" justifyV="TOP" outline="NORMAL" text="" wordwrap="true" nonspacewrap="true" spacing="3">
                     <Anchors>
                         <Anchor point="TOPLEFT" relativeKey="$parent.Timestamp" relativePoint="TOPRIGHT" x="3"/>
                         <Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="TOPRIGHT" x="-2"/>
-                    </Anchors>
+                    </Anchors>w
                 </FontString>
+            </Layer>
+
+            <Layer level="BACKGROUND">
+                <Texture parentKey="Background">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.Text" relativePoint="TOPLEFT"/>
+                        <Anchor point="BOTTOMRIGHT" relativeKey="$parent.Text" relativePoint="BOTTOMRIGHT"/>
+                    </Anchors>
+                </Texture>
             </Layer>
         </Layers>
     </Frame>
