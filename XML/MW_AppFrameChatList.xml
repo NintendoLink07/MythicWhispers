@@ -1,0 +1,39 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+    <Frame name="MW_AppFrameChatList" inherits="BackdropTemplate" mixin="AppFrameChatListMixin" virtual="true">
+        <Frames>
+            <Frame parentKey="ScrollBox" inherits="WowScrollBoxList" >
+                <Anchors>
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Anchors>
+            </Frame>
+
+            <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeKey="$parent.ScrollBox" relativePoint="TOPRIGHT" y="-4"/>
+                    <Anchor point="BOTTOMLEFT" relativeKey="$parent.ScrollBox" relativePoint="BOTTOMRIGHT" y="4"/>
+                </Anchors>
+            </EventFrame>
+        </Frames>
+
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture parentKey="Overlay" setAllPoints="true" hidden="true">
+                    <Color r="1" g="1" b="1" a="0.5" />
+                </Texture>
+            </Layer>
+
+            <Layer level="BACKGROUND" textureSubLevel="-1">
+                <Texture parentKey="Background" setAllPoints="true">
+                    <Color r="1" g="1" b="1" a="1" />
+                </Texture>
+            </Layer>
+        </Layers>
+
+        <Scripts>
+            <OnLoad method="OnLoad" />
+            <OnShow method="OnShow" />
+        </Scripts>
+    </Frame>
+</Ui>

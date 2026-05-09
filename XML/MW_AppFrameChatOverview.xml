@@ -1,0 +1,60 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+    <Frame name="MW_AppFrameChatOverview" inherits="BackdropTemplate" mixin="AppFrameChatOverviewMixin" virtual="true">
+        <Frames>
+            <Frame parentKey="Header" inherits="MW_AppFrameChatOverviewHeader" hidden="true">
+                <Size y="48" />
+                
+                <Anchors>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                </Anchors>
+            </Frame>
+
+            <Frame parentKey="EditBox" hidden="true">
+                <Size y="36" />
+                
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Anchors>
+
+                <Frames>
+                    <EditBox parentKey="ChatBox" inherits="InputBoxTemplate, AutoCompleteEditBoxTemplate" hidden="false" autoFocus="false">
+                        <Size y="28"/>
+                        <Anchors>
+                            <Anchor point="LEFT" x="20"/>
+                            <Anchor point="RIGHT" x="-32"/>
+                        </Anchors>
+                    </EditBox>
+                </Frames>
+            </Frame>
+
+            <Frame parentKey="ScrollBox" inherits="WowScrollBoxList" >
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeKey="$parent.Header" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeKey="$parent.EditBox" relativePoint="TOPRIGHT"/>
+                </Anchors>
+            </Frame>
+
+            <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeKey="$parent.ScrollBox" relativePoint="TOPRIGHT" y="-3"/>
+                    <Anchor point="BOTTOMLEFT" relativeKey="$parent.ScrollBox" relativePoint="BOTTOMRIGHT" y="4"/>
+                </Anchors>
+            </EventFrame>
+        </Frames>
+
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture parentKey="Background" setAllPoints="true">
+                    <Color r="1" g="1" b="1" a="1" />
+                </Texture>
+            </Layer>
+        </Layers>
+
+        <Scripts>
+            <OnLoad method="OnLoad" />
+        </Scripts>
+    </Frame>
+</Ui>

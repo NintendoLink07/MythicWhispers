@@ -1,19 +1,21 @@
-## Interface: 110002, 110000
+## Interface: 120005
 ## Title: MythicWhispers
 ## Author: Rhany-Ravencrest
 ## Notes: The new standard for WoW /w chats
-## Version: 0.0.3
+## Version: 0.0.4
 ## IconTexture: Interface\AddOns\MythicWhispers\res\infoIcons\logo_noText_128.png
-## SavedVariables: MW_SavedSettings, MW_ChatLogs
-## AddonCompartmentFunc: MW_OpenInterfaceOptions
+## SavedVariables: MW_ChatLogs
+
+Mixins/AppFrameMixin.lua
+Mixins/AppFrameChatListMixin.lua
+Mixins/AppFrameChatOverviewMixin.lua
+Mixins/AppFrameConversationMixin.lua
+
+XML/MW_AppFrame.xml
+XML/MW_AppFrameChatList.xml
+XML/MW_AppFrameChatOverview.xml
+XML/MW_AppFrameChatOverviewHeader.xml
+XML/MW_AppFrameConversationButton.xml
+XML/MW_AppFrameConversationMessage.xml
 
 MainFrame.lua
-SlickDropDown.lua
-SharedFunctions.lua
-
-XML/MW_MainFrame.xml
-XML/MW_ChatTemplate.xml
-XML/MW_LogLineTemplate.xml
-
-XML/MW_DropDownMenu.xml
-XML/MW_DropDownMenuEntry.xml

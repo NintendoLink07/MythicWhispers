@@ -1,0 +1,66 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+    <Frame name="MW_AppFrameChatOverviewHeader" inherits="BackdropTemplate" mixin="AppFrameChatOverviewHeaderMixin" virtual="true">
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture parentKey="Background" setAllPoints="true">
+                </Texture>
+            </Layer>
+
+            <Layer level="OVERLAY">
+                <Texture parentKey="Picture">
+                    <Size x="40" y="40" />
+                    <Anchors>
+                        <Anchor point="LEFT" x="4"/>
+                    </Anchors>
+                </Texture>
+
+                <MaskTexture parentKey="CircleMask" file="Interface\CharacterFrame\TempPortraitAlphaMask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE">
+                    <Size x="40" y="40"/>
+                    <Anchors>
+                        <Anchor point="CENTER" relativeKey="$parent.Picture" relativePoint="CENTER"/>
+                    </Anchors>
+                    <MaskedTextures>
+                        <MaskedTexture childKey="Picture"/>
+                    </MaskedTextures>
+                </MaskTexture>
+
+                <FontString parentKey="Name" font="SystemFont_Med1" justifyH="LEFT" justifyV="MIDDLE">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.Picture" relativePoint="TOPRIGHT" x="4" y="-4"/>
+                    </Anchors>
+                    <!--<Color r="0" g="0" b="0" a="1" />!-->
+                </FontString>
+
+                <FontString parentKey="Time" font="SystemFont_Med1" justifyH="LEFT" justifyV="MIDDLE">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.Picture" relativePoint="BOTTOMRIGHT" x="4" y="4"/>
+                    </Anchors>
+                    <!--<Color r="0" g="0" b="0" a="1" />!-->
+                </FontString>
+            </Layer>
+        </Layers>
+
+        <Frames>
+            <Button parentKey="CheckStatusButton" inherits="UIPanelButtonTemplate" text="PLAYER_STATUS">
+                <Size x="100" y="20"/>
+                <Anchors>
+                    <Anchor point="TOPRIGHT" x="-36" y="-4"/>
+                </Anchors>
+            </Button>
+
+            <Button parentKey="CloseButton" inherits="UIPanelCloseButton" topLevel="true">
+                <Size x="20" y="20" />
+                <Anchors>
+                    <Anchor point="RIGHT" x="-3" />
+                </Anchors>
+
+                <Scripts>
+                    <OnClick>
+                        self:GetParent():CloseConversation()
+                    </OnClick>
+                </Scripts>
+            </Button>
+        </Frames>
+    </Frame>
+</Ui>

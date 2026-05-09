@@ -119,20 +119,64 @@
 
                 <Size y="20" />
             </EditBox>
+            
+            <ScrollingMessageFrame parentKey="TimeLine">
+                <Size x="110" y="400" />
 
-            <Frame parentKey="ScrollBox" inherits="WoWScrollBoxList">
+                -- CREATE TIMELINE MESSAGE FRAME
+            </ScrollingMessageFrame>
+
+
+            <Frame parentKey="TimeLine" inherits="WowScrollBoxList">
+                <Size x="110" />
                 <Anchors>
-                    <Anchor point="TOPLEFT" relativeKey="$parent.ChatButtonScrollFrame" relativePoint="BOTTOMLEFT" x="0" y="-7"/>
-                    <Anchor point="BOTTOMRIGHT" relativeKey="$parent.ChatBox" relativePoint="TOPRIGHT" x="-20" y="3"/>
+                    <Anchor point="TOPLEFT" relativeKey="$parent.ChatButtonScrollFrame" relativePoint="BOTTOMLEFT" y="-7"/>
+                    <Anchor point="BOTTOMLEFT" relativeKey="$parent.ChatBox" relativePoint="TOPLEFT" y="3"/>
                 </Anchors>
+
+                <Frames>
+                    <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar" hidden="true">
+                        <Anchors>
+                            <Anchor point="TOPRIGHT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Anchors>
+                    </EventFrame>
+                </Frames>
             </Frame>
-
-            <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
+            
+            <ScrollingMessageFrame parentKey="ScrollingChatFrame">
                 <Anchors>
-                    <Anchor point="TOPLEFT" relativeKey="$parent.ScrollBox" relativePoint="TOPRIGHT" x="5"/>
-                    <Anchor point="BOTTOMLEFT" relativeKey="$parent.ScrollBox" relativePoint="BOTTOMRIGHT" x="5"/>
+                    <Anchor point="TOPLEFT" relativeKey="$parent.TimeLine" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeKey="$parent.ChatBox" relativePoint="TOPRIGHT" y="3"/>
                 </Anchors>
-            </EventFrame>
+                <Frames>
+                    <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
+                        <Anchors>
+                            <Anchor point="TOPRIGHT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Anchors>
+                    </EventFrame>
+                </Frames>
+
+                <Scripts>
+                    <OnLoad>
+                        self:SetFading(false);
+                        self:SetFontObject(SystemFont_Shadow_Med1);
+                        self:SetJustifyH("LEFT");
+                        self:SetHyperlinksEnabled(true);
+                        self:SetTextCopyable(true);
+                        self:SetTimeVisible(true);
+                        self:SetSpacing(4)
+
+                        local noMouseWheel = not GetCVarBool("chatMouseScroll");
+                        ScrollUtil.InitScrollingMessageFrameWithScrollBar(self, self.ScrollBar, noMouseWheel);
+                    </OnLoad>
+                    <OnHyperlinkEnter function="MW_LinkHandler"/>
+                    <OnHyperlinkLeave>
+                        GameTooltip:Hide()
+                    </OnHyperlinkLeave>
+                </Scripts>
+            </ScrollingMessageFrame>
 
             <EditBox parentKey="CopyBox" inherits="InputBoxTemplate" framestrata="FULLSCREEN" autoFocus="false" font="SystemFont_Shadow_Med1">                
                 <Scripts>
@@ -182,7 +226,7 @@
 
                         <Scripts>
                             <OnClick>
-                                self:GetParent():GetParent().ScrollBox:Show()
+                                self:GetParent():GetParent().ScrollingChatFrame:Show()
                                 self:GetParent():Hide()
                             </OnClick>
                         </Scripts>
