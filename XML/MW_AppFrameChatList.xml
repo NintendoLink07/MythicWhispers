@@ -5,7 +5,7 @@
             <Frame parentKey="ScrollBox" inherits="WowScrollBoxList" >
                 <Anchors>
                     <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" y="4"/>
                 </Anchors>
             </Frame>
 
@@ -15,6 +15,39 @@
                     <Anchor point="BOTTOMLEFT" relativeKey="$parent.ScrollBox" relativePoint="BOTTOMRIGHT" y="4"/>
                 </Anchors>
             </EventFrame>
+    
+            <Button parentKey="Tab1" id="1" text="Whispers" inherits="PanelTabButtonTemplate">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        self.frameName = "Whispers"
+                    </OnLoad>
+                    <OnClick>
+                        self:GetParent().selectedTab = self:GetID()
+                        self:GetParent():OnShow()
+                        PanelTemplates_SetTab(self:GetParent(), self:GetID())
+                    </OnClick>
+                </Scripts>
+            </Button>
+
+            <Button parentKey="Tab2" id="2" text="Friends" inherits="PanelTabButtonTemplate" hidden="true">
+                <Anchors>
+                    <Anchor point="LEFT" relativeKey="$parent.Tab1" relativePoint="RIGHT"/>
+                </Anchors>
+                
+                <Scripts>
+                    <OnLoad>
+                        self.frameName = "Friends"
+                    </OnLoad>
+                    <OnClick>
+                        self:GetParent().selectedTab = self:GetID()
+                        self:GetParent():OnShow()
+                        PanelTemplates_SetTab(self:GetParent(), self:GetID())
+                    </OnClick>
+                </Scripts>
+            </Button>
         </Frames>
 
         <Layers>

@@ -1,13 +1,27 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\..\FrameXML\UI.xsd">
-    <Button name="MW_AppFrameConversationButton" mixin="AppFrameConversationButtonMixin" registerForClicks="LeftButtonUp, RightButtonUp" virtual="true">
-        <Size y="48" />
-        
-		<NormalTexture parentKey="NormalTexture" atlas="pvpqueue-button-casual-up"/>
+    <Button name="MW_AppFrameConversationButtonVoiceChat" mixin="AppFrameConversationButtonVoiceChatMixin" registerForClicks="LeftButtonUp, RightButtonUp" virtual="true">   
+        <Size x="100" y="48" />
+
 		<PushedTexture atlas="pvpqueue-button-casual-down"/>
-		<HighlightTexture parentKey="HighlightTexture" atlas="pvpqueue-button-casual-highlight" alphaMode="ADD"/>
+        <HighlightTexture atlas="BattleBar-SwapPetFrame-Highlight" >
+            <Anchors>
+                <Anchor point="TOPLEFT" x="3" y="-3"/>
+                <Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
+            </Anchors>
+        </HighlightTexture>
 
         <Layers>
+            <Layer level="BACKGROUND">
+                <Texture parentKey="Background" atlas="pvpqueue-button-casual-up" setAllPoints="true" />
+                <Texture parentKey="HoverAdded" atlas="groupfinder-highlightbar-green" alphaMode="ADD">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" x="3" y="-3"/>
+                        <Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+
             <Layer level="OVERLAY">
                 <Texture parentKey="Picture">
                     <Size x="40" y="40" />
@@ -75,6 +89,7 @@
         </Layers>
 
         <Scripts>
+            <OnLoad method="OnLoad" />
             <OnClick method="OnClick" />
         </Scripts>
     </Button>

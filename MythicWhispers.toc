@@ -5,17 +5,35 @@
 ## Version: 0.0.4
 ## IconTexture: Interface\AddOns\MythicWhispers\res\infoIcons\logo_noText_128.png
 ## SavedVariables: MW_ChatLogs
+## SavedVariablesPerCharacter: MW_CharacterChatLogs
 
 Mixins/AppFrameMixin.lua
+
 Mixins/AppFrameChatListMixin.lua
 Mixins/AppFrameChatOverviewMixin.lua
+Mixins/AppFrameVoiceChatRoomMixin.lua
+
+Mixins/AppFrameVoiceChatRoomMemberMixin.lua
+
 Mixins/AppFrameConversationMixin.lua
+Mixins/AppFrameConversationDaystampMixin.lua
+Mixins/AddButtonMixin.lua
+
+XML/Misc/MW_PlusButton.xml
 
 XML/MW_AppFrame.xml
 XML/MW_AppFrameChatList.xml
 XML/MW_AppFrameChatOverview.xml
+XML/MW_AppFrameVoiceChatRoom.xml
+
 XML/MW_AppFrameChatOverviewHeader.xml
 XML/MW_AppFrameConversationButton.xml
+XML/MW_AppFrameConversationButtonVoiceChat.xml
+XML/MW_AppFrameVoiceChatRoomMemberTemplate.xml
 XML/MW_AppFrameConversationMessage.xml
+XML/MW_AppFrameConversationDaystamp.xml
+XML/MW_AppFrameNewConversationButton.xml
+XML/MW_AppFrameConnectionStatusFrameTemplate.xml
 
 MainFrame.lua
+SharedFunctions.lua

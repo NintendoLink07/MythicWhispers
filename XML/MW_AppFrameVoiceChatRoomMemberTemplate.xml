@@ -1,0 +1,70 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+    <Button name="MW_AppFrameVoiceChatRoomMemberTemplate" mixin="AppFrameVoiceChatRoomMemberMixin" registerForClicks="LeftButtonUp, RightButtonUp" virtual="true">
+        <Size x="40" y="40" />
+
+        <HighlightTexture atlas="communities-create-button-highlight" alphaMode="ADD">
+            <Anchors>
+                <Anchor point="TOPLEFT" x="-3" y="4"/>
+                <Anchor point="BOTTOMRIGHT" x="2" y="-4"/>
+            </Anchors>
+        </HighlightTexture>
+
+        <Layers>
+            <Layer level="OVERLAY">
+                <FontString parentKey="Name" font="SystemFont_Med2" justifyH="LEFT" justifyV="MIDDLE">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" x="8" y="8"/>
+                        <Anchor point="BOTTOMRIGHT" x="-8" y="8"/>
+                    </Anchors>
+                </FontString>
+
+                <Texture parentKey="MicStatus">
+                    <Size x="16" y="16" />
+                    <Anchors>
+                        <Anchor point="TOPLEFT" x="4" y="-4"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+            
+            <Layer level="BACKGROUND">
+                <Texture parentKey="NameBackground" setAllPoints="true">
+                    <Color r="0.33" g="0.33" b="0.33" a="0.8" />
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.Name" x="-4" y="4"/>
+                        <Anchor point="BOTTOMRIGHT" relativeKey="$parent.Name" x="4" y="-4"/>
+                    </Anchors>
+                </Texture>
+                
+                <MaskTexture parentKey="NameBackgroundMask" atlas="shop-card-wide-mask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.NameBackground"/>
+                        <Anchor point="BOTTOMRIGHT" relativeKey="$parent.NameBackground"/>
+                    </Anchors>
+					<MaskedTextures>
+						<MaskedTexture childKey="NameBackground"/>
+					</MaskedTextures>
+				</MaskTexture>
+            </Layer>
+
+            <Layer level="BACKGROUND" textureSubLevel="-1">
+                <Texture parentKey="Background" setAllPoints="true">
+                    <Color r="1" g="1" b="1" a="1" />
+                </Texture>
+                
+                <MaskTexture parentKey="BackgroundMask" atlas="shop-card-wide-mask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE" setAllPoints="true">
+					<MaskedTextures>
+						<MaskedTexture childKey="Background"/>
+					</MaskedTextures>
+				</MaskTexture>
+            </Layer>
+        </Layers>
+
+        <Scripts>
+            <OnLoad method="OnLoad" />
+            <OnShow method="OnShow" />
+            <OnEvent method="OnEvent" />
+            <OnClick method="OnClick" />
+        </Scripts>
+    </Button>
+</Ui>

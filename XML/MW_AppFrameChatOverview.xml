@@ -11,7 +11,7 @@
                 </Anchors>
             </Frame>
 
-            <Frame parentKey="EditBox" hidden="true">
+            <Frame parentKey="EditBoxContainer" inherits="BackdropTemplate" hidden="true">
                 <Size y="36" />
                 
                 <Anchors>
@@ -19,30 +19,39 @@
                     <Anchor point="BOTTOMRIGHT"/>
                 </Anchors>
 
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <Texture parentKey="Background" setAllPoints="true">
+                            <Color r="0.1" g="0.1" b="0.1" a="0.9" />
+                        </Texture>
+                    </Layer>
+                </Layers>
+
                 <Frames>
                     <EditBox parentKey="ChatBox" inherits="InputBoxTemplate, AutoCompleteEditBoxTemplate" hidden="false" autoFocus="false">
                         <Size y="28"/>
                         <Anchors>
-                            <Anchor point="LEFT" x="20"/>
-                            <Anchor point="RIGHT" x="-32"/>
+                            <Anchor point="LEFT" x="14"/>
+                            <Anchor point="RIGHT" x="-10"/>
                         </Anchors>
                     </EditBox>
                 </Frames>
             </Frame>
 
+            <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
+                <Size x="34" />
+                <Anchors>
+                    <Anchor point="TOPRIGHT" relativeKey="$parent.Header" relativePoint="BOTTOMRIGHT" y="-4"/>
+                    <Anchor point="BOTTOMRIGHT" relativeKey="$parent.EditBoxContainer" relativePoint="TOPRIGHT" y="4"/>
+                </Anchors>
+            </EventFrame>
+
             <Frame parentKey="ScrollBox" inherits="WowScrollBoxList" >
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeKey="$parent.Header" relativePoint="BOTTOMLEFT"/>
-                    <Anchor point="BOTTOMRIGHT" relativeKey="$parent.EditBox" relativePoint="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeKey="$parent.EditBoxContainer" relativePoint="TOPRIGHT" x="-34"/>
                 </Anchors>
             </Frame>
-
-            <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
-                <Anchors>
-                    <Anchor point="TOPLEFT" relativeKey="$parent.ScrollBox" relativePoint="TOPRIGHT" y="-3"/>
-                    <Anchor point="BOTTOMLEFT" relativeKey="$parent.ScrollBox" relativePoint="BOTTOMRIGHT" y="4"/>
-                </Anchors>
-            </EventFrame>
         </Frames>
 
         <Layers>
