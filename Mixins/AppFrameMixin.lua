@@ -297,7 +297,7 @@ function AppFrameMixin:CheckCallStatus(frame)
 end
 
 function AppFrameMixin:SendMuteStatusUpdate()
-    C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", "VOICE_CHAT_CHANNEL_TRANSMIT_CHANGED_" .. strupper(tostring(C_VoiceChat.IsMuted())), "PARTY")
+    C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", MythicWhispers.WriteCBOR("VOICE_CHAT_CHANNEL_TRANSMIT_CHANGED_" .. strupper(tostring(C_VoiceChat.IsMuted()))), "PARTY")
 
 end
 
@@ -308,7 +308,7 @@ function AppFrameMixin:RequestMuteStatusUpdate()
         local channel = C_VoiceChat.GetChannel(channelID)
 
         if(channel and channel.isActive) then
-            C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", C_EncodingUtil.SerializeCBOR("VOICE_CHAT_CHANNEL_TRANSMIT_REQUEST"), "PARTY")
+            C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", MythicWhispers.WriteCBOR("VOICE_CHAT_CHANNEL_TRANSMIT_REQUEST"), "PARTY")
 
         end
     end
@@ -331,7 +331,7 @@ function AppFrameMixin:OnLoad()
 	EventRegistry:RegisterCallback("MythicWhispers.HandleJoinRequest", self.HandleJoinRequest, self);
 	EventRegistry:RegisterCallback("MythicWhispers.OpenVoiceChatRoom", self.RequestMuteStatusUpdate, self);
 
-    print(C_ChatInfo.RegisterAddonMessagePrefix(addonName))
+    C_ChatInfo.RegisterAddonMessagePrefix(addonName)
 
     self:SetScript("OnEvent", function(selfFrame, event, ...)
         if(event == "CHAT_MSG_WHISPER") then
@@ -365,6 +365,8 @@ function AppFrameMixin:OnLoad()
 
             self.ChatList:RefreshConversationButtons()
             self:RequestMuteStatusUpdate()
+
+            MythicWhispers:TriggerChatTypeEvent()
 
         elseif(event == "VOICE_CHAT_CHANNEL_ACTIVATED") then
             self:SetVoiceChatCallStatusColor(...)
@@ -405,7 +407,7 @@ function AppFrameMixin:OnLoad()
         elseif(event == "CHAT_MSG_ADDON_LOGGED") then
             local prefix, cborText, channel, sender, target, zoneChannelID, localID, name, instanceID = ...
 
-            local text  = C_EncodingUtil.DeserializeCBOR(cborText)
+            local text  = MythicWhispers.ReadCBOR(cborText)
 
             if(text == "VOICE_CHAT_CHANNEL_TRANSMIT_REQUEST") then
                 self:SendMuteStatusUpdate()

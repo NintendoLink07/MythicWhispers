@@ -290,10 +290,19 @@ end
 
 AppFrameConversationButtonVoiceChatMixin = {}
 
-function AppFrameConversationButtonVoiceChatMixin:OnLoad()
-    self.Name:SetText(mw:GetChatType())
+function AppFrameConversationButtonVoiceChatMixin:SetChatType(type)
+    self:UnregisterAllMessageGroups()
 
+    self:AddMessageGroup(type)
+
+    self.Name:SetText(strlower(type):gsub("^%l", string.upper) .. " " .. VOICE_CHAT)
+
+end
+
+function AppFrameConversationButtonVoiceChatMixin:OnLoad()
+    self.messageTypeList = {}
     self.LastMessage:SetText()
+    EventRegistry:RegisterCallback("MythicWhispers.ChatTypeChanged", self.SetChatType, self)
 
 end
 
@@ -318,4 +327,30 @@ function AppFrameConversationButtonVoiceChatMixin:OnClick(...)
         end)
 
     end
+end
+
+function AppFrameConversationButtonVoiceChatMixin:OnEvent(event, ...)
+    print(event)
+
+end
+
+function AppFrameConversationButtonVoiceChatMixin:AddMessageGroup(group)
+	local info = ChatTypeGroup[group];
+	if ( info ) then
+		tinsert(self.messageTypeList, group);
+		for index, value in pairs(info) do
+			self:RegisterEvent(value);
+
+		end
+	end
+end
+
+function AppFrameConversationButtonVoiceChatMixin:UnregisterAllMessageGroups()
+	for index, value in pairs(self.messageTypeList) do
+		for eventIndex, eventValue in pairs(ChatTypeGroup[value]) do
+			self:UnregisterEvent(eventValue);
+		end
+	end
+
+	self.messageTypeList = {};
 end

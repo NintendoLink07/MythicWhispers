@@ -84,7 +84,7 @@ function AppFrameChatListMixin:RefreshConversationButtons()
 
     if(C_VoiceChat.GetActiveChannelID()) then
         dataProvider:Insert({
-            template = "MW_AppFrameConversationButtonVoiceChat"
+            template = "MW_AppFrameConversationButtonVoiceChat",
         })
     end
 

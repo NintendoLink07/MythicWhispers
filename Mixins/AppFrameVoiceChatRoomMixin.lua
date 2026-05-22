@@ -2,14 +2,24 @@ local addonName, mw = ...
 
 AppFrameVoiceChatRoomMixin = {}
 
-local CHILD_FRAME_WIDTH = 300
 local CHAT_FRAME_WIDTH_SCALE = 0.3
 
-local currentChatType = "WHISPER"
-
 local muteStatusTable = {}
+local playerColorTable = {}
 
-local dataProvider = CreateDataProvider()
+
+function AppFrameVoiceChatRoomMixin:GetPlayerRGBA(playerName)
+    local tbl = playerColorTable[playerName]
+
+    if(tbl) then
+        return tbl.r, tbl.g, tbl.b, 1
+        
+    else
+        
+
+    end
+end
+
 
 function AppFrameVoiceChatRoomMixin:FindPlayerFrame(playerName)
     for frame in self.framePool:EnumerateActive() do
@@ -20,14 +30,53 @@ function AppFrameVoiceChatRoomMixin:FindPlayerFrame(playerName)
     end
 end
 
+function AppFrameVoiceChatRoomMixin:RefreshChatType(type)
+    local voiceTextChat = self.ChatContainer.Chat
+
+    voiceTextChat:UnregisterAllMessageGroups()
+
+    if(type) then
+        if(type == "NULL") then
+            print("JA WAS IS'N DES; IS JA A NULL")
+
+        elseif(type == "CUSTOM") then
+            print("EI DES IS A CUSTOM; HEIßT BESONDERS")
+
+        elseif(type == "RAID") then
+            voiceTextChat:AddMessageGroup("RAID")
+            voiceTextChat:AddMessageGroup("RAID_LEADER")
+            voiceTextChat:AddMessageGroup("RAID_WARNING")
+
+        elseif(type == "PARTY") then
+            voiceTextChat:AddMessageGroup("PARTY")
+            voiceTextChat:AddMessageGroup("PARTY_LEADER")
+
+        elseif(type == "INSTANCE") then
+            voiceTextChat:AddMessageGroup("INSTANCE_CHAT")
+            voiceTextChat:AddMessageGroup("INSTANCE_CHAT_LEADER")
+
+        elseif(type == "GUILD") then
+            voiceTextChat:AddMessageGroup("GUILD")
+            voiceTextChat:AddMessageGroup("OFFICER")
+
+        elseif(type == "COMMUNITY") then
+            print("JA DES IS A COMMUNITY")
+
+        end
+    end
+end
+
 function AppFrameVoiceChatRoomMixin:OnEvent(event, ...)
-    if(event == "VOICE_CHAT_CHANNEL_ACTIVATED") then
-        mw:RefreshChatType()
+    if(event == "GROUP_ROSTER_UPDATE") then
+        self:Refresh()
+
+    elseif(event == "VOICE_CHAT_CHANNEL_ACTIVATED") then
+        MythicWhispers:RefreshChatType()
 
     elseif(event == "CHAT_MSG_ADDON_LOGGED") then
         local prefix, cborText, channel, sender, target, zoneChannelID, localID, name, instanceID = ...
 
-        local text  = C_EncodingUtil.DeserializeCBOR(cborText)
+        local text = MythicWhispers.ReadCBOR(cborText)
 
         if(string.find(text, "VOICE_CHAT_CHANNEL_TRANSMIT_CHANGED_")) then
             if(text == "VOICE_CHAT_CHANNEL_TRANSMIT_CHANGED_TRUE") then
@@ -51,8 +100,10 @@ end
 function AppFrameVoiceChatRoomMixin:OnLoad()
 	EventRegistry:RegisterCallback("MythicWhispers.OpenConversation", function() self:Hide() end, self);
 	EventRegistry:RegisterCallback("MythicWhispers.OpenVoiceChatRoom", self.Refresh, self);
+	EventRegistry:RegisterCallback("MythicWhispers.ChatTypeChanged", self.RefreshChatType, self);
 
     self:RegisterEvent("VOICE_CHAT_CHANNEL_ACTIVATED")
+    self:RegisterEvent("GROUP_ROSTER_UPDATE")
     self:RegisterEvent("CHAT_MSG_ADDON_LOGGED")
 
     self.GridManageFrame.Grid.childXPadding = 4
@@ -85,7 +136,7 @@ function AppFrameVoiceChatRoomMixin:OnLoad()
         local text = selfFrame:GetText()
         if text and text ~= "" then
             -- Add the typed text directly to your message area
-            C_ChatInfo.SendChatMessage(text, currentChatType)
+            C_ChatInfo.SendChatMessage(text, MythicWhispers:GetChatType())
             selfFrame:SetText("") -- Clear the box
         end
         selfFrame:ClearFocus() -- Close the input keyboard focus
@@ -101,7 +152,7 @@ function AppFrameVoiceChatRoomMixin:Refresh()
     local width = self:GetWidth()
     self.ChatContainer:SetWidth(width * CHAT_FRAME_WIDTH_SCALE)
 
-    self:RefreshChatType()
+    MythicWhispers:TriggerChatTypeEvent()
 
     self.framePool:ReleaseAll()
 
@@ -163,7 +214,16 @@ function AppFrameVoiceChatRoomMixin:Refresh()
                 frame.memberID = v.memberID
                 frame.channelID = channelID
 
-                frame.Background:SetColorTexture(random(35, 75) / 100, random(35, 75) / 100, random(35, 75) / 100, 1)
+                if(not playerColorTable[frame.fullName]) then
+                    playerColorTable[frame.fullName] = {
+                        r = random(35, 75) / 100,
+                        g = random(35, 75) / 100,
+                        b = random(35, 75) / 100,
+                    }
+
+                end
+
+                frame.Background:SetColorTexture(self:GetPlayerRGBA(frame.fullName))
 
                 frame:SetSelfMuted(muteStatusTable[frame.fullName])
 
