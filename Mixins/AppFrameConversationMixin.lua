@@ -284,6 +284,22 @@ local BACKDROP_TUTORIAL = {
 
 AppFrameConversationMessageMixin = {}
 
+function AppFrameConversationMessageMixin:OnClick(...)
+    if(... == "LeftButton") then
+
+    elseif(... == "RightButton") then
+        local currentMenu = MenuUtil.CreateContextMenu(self, function(ownerRegion, rootDescription)
+			rootDescription:CreateTitle();
+			rootDescription:SetTag("MW_CONVERSATIONBUTTON")
+
+			rootDescription:CreateButton(DELETE, function()
+                EventRegistry:TriggerEvent("MythicWhispers.DeleteConversation", self.name)
+                
+            end)
+        end)
+    end
+end
+
 function AppFrameConversationMessageMixin:Refresh()
     local data = self:GetData()
 

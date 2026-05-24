@@ -343,7 +343,7 @@ function AppFrameMixin:SendMessageRead(sender, date, message)
         local tbl = {
             event = "TEXT_MESSAGE_READ",
             date = date,
-            hash = MythicWhispers.WriteCBOR(message)
+            message = message
 
         }
 
@@ -388,11 +388,11 @@ end
 end]]
 
 function AppFrameMixin:SetMessageRead(tbl)
-    local sender, date, hash = tbl.sender, tbl.date, tbl.hash
+    local sender, date, message = tbl.sender, tbl.date, tbl.message
     local logs = MW_ChatLogs[sender]
 
     for k, v in MythicWhispers.rpairs(logs.messages) do
-        if(not v.read and C_DateAndTime.CompareCalendarTime(date, v.date) == 0 and MythicWhispers.ReadCBOR(hash) == v.message) then
+        if(not v.read and C_DateAndTime.CompareCalendarTime(date, v.date) == 0 and message == v.message) then
             v.read = true
             break
         end
@@ -497,15 +497,14 @@ function AppFrameMixin:OnLoad()
             local prefix, cborText, channel, sender, target, zoneChannelID, localID, name, instanceID = ...
 
             local tbl = MythicWhispers.ReadCBOR(cborText)
-            tbl.sender = sender
 
             if(tbl.event == "VOICE_CHAT_CHANNEL_TRANSMIT_REQUEST") then
                 self:SendMuteStatusUpdate()
 
             elseif(tbl.event == "TEXT_MESSAGE_READ") then
+                tbl.sender = sender
                 self:SetMessageRead(tbl)
                 EventRegistry:TriggerEvent("MythicWhispers.RefreshConversation", sender)
-
                 
             end
         end

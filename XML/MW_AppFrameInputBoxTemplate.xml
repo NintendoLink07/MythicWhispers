@@ -1,0 +1,16 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+    <EditBox name="MW_AppFrameInputBoxTemplate" inherits="InputBoxInstructionsTemplate" autoFocus="false" historyLines="30" letters="256" virtual="true">
+		<KeyValues>
+			<KeyValue key="instructionText" value="PROFESSIONS_CRAFTING_FORM_OPTIONAL_MESSAGE" type="global"/>
+		</KeyValues>
+
+        <Scripts>
+            <OnLoad>
+                self.Instructions:SetPoint("TOPLEFT", 0, 0)
+                self.Instructions:SetPoint("BOTTOMRIGHT", 0, 0)
+                self.Instructions:SetText(self.instructionText)
+            </OnLoad>
+        </Scripts>
+    </EditBox>
+</Ui>

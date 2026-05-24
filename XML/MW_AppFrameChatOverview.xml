@@ -28,7 +28,7 @@
                 </Layers>
 
                 <Frames>
-                    <EditBox parentKey="ChatBox" inherits="InputBoxTemplate, AutoCompleteEditBoxTemplate" hidden="false" autoFocus="false">
+                    <EditBox parentKey="ChatBox" inherits="MW_AppFrameInputBoxTemplate">
                         <Size y="28"/>
                         <Anchors>
                             <Anchor point="LEFT" x="14"/>

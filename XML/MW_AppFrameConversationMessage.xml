@@ -38,5 +38,9 @@
                 </Texture>
             </Layer>
         </Layers>
+
+        <Scripts>
+            <OnClick method="OnClick" />
+        </Scripts>
     </Button>
 </Ui>

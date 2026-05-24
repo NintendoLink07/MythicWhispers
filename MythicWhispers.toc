@@ -36,6 +36,7 @@ XML/MW_AppFrameConversationMessage.xml
 XML/MW_AppFrameConversationDaystamp.xml
 XML/MW_AppFrameNewConversationButton.xml
 XML/MW_AppFrameConnectionStatusFrameTemplate.xml
+XML/MW_AppFrameInputBoxTemplate.xml
 
 MainFrame.lua
 SharedFunctions.lua
