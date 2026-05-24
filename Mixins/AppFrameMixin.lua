@@ -172,7 +172,7 @@ function AppFrameMixin:CreateConversation(playerName, guid)
     end
 end
 
-function AppFrameMixin:AddLog(playerName, text, sender, lineID)
+function AppFrameMixin:AddLog(playerName, text, sender)
     if(playerName) then
         local logs = MW_ChatLogs[playerName]
         local chatOpen = self.ChatOverview:GetOpenConversationName() == playerName
@@ -183,7 +183,7 @@ function AppFrameMixin:AddLog(playerName, text, sender, lineID)
                 logs.numOfUnreadMessages = logs.numOfUnreadMessages + 1
 
             else
-                EventRegistry:TriggerEvent("MythicWhispers.SendMessageRead", playerName, currentDate, lineID)
+                EventRegistry:TriggerEvent("MythicWhispers.SendMessageRead", playerName, currentDate, text)
 
             end
 
@@ -197,7 +197,6 @@ function AppFrameMixin:AddLog(playerName, text, sender, lineID)
             date = currentDate,
             viewed = chatOpen or sender == "player",
             timestamp = GetServerTime(),
-            lineID = lineID,
         })
     end
 end
@@ -339,12 +338,13 @@ function AppFrameMixin:ScheduleAddonMessageForReadMessages(sender, tbl)
 
 end
 
-function AppFrameMixin:SendMessageRead(sender, date, lineID)
-    if(sender and date and lineID) then
+function AppFrameMixin:SendMessageRead(sender, date, message)
+    if(sender and date) then
         local tbl = {
             event = "TEXT_MESSAGE_READ",
-            lineID = lineID,
             date = date,
+            hash = MythicWhispers.WriteCBOR(message)
+
         }
 
         local status = C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", MythicWhispers.WriteCBOR(tbl), "WHISPER", sender)
@@ -356,8 +356,8 @@ function AppFrameMixin:SendMessageRead(sender, date, lineID)
     end
 end
 
---[[function AppFrameMixin:SendMessageReadOverChannel(sender, date, lineID)
-    if(sender and date and lineID) then
+--[[function AppFrameMixin:SendMessageReadOverChannel(sender, date)
+    if(sender and date) then
         local chatName = "MYTHICWHISPERSVALUESCHAT"
 
         JoinPermanentChannel(chatName, nil, nil, 0)
@@ -377,7 +377,6 @@ end
         if(channelID) then
             local tbl = {
                 event = "TEXT_MESSAGE_READ",
-                lineID = lineID,
                 date = date,
                 sender = sender
             }
@@ -389,16 +388,13 @@ end
 end]]
 
 function AppFrameMixin:SetMessageRead(tbl)
-    local sender, date, lineID = tbl.sender, tbl.date, tbl.lineID
+    local sender, date, hash = tbl.sender, tbl.date, tbl.hash
     local logs = MW_ChatLogs[sender]
 
-    local checkForID = lineID + 1
-
     for k, v in MythicWhispers.rpairs(logs.messages) do
-        if(v.lineID == checkForID and C_DateAndTime.CompareCalendarTime(date, v.date) == 0) then
-
+        if(not v.read and C_DateAndTime.CompareCalendarTime(date, v.date) == 0 and MythicWhispers.ReadCBOR(hash) == v.message) then
             v.read = true
-
+            break
         end
     end
 end
@@ -428,14 +424,14 @@ function AppFrameMixin:OnLoad()
             local text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, languageID, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, suppressRaidIcons = ...
 
             EventRegistry:TriggerEvent("MythicWhispers.CreateConversation", playerName, guid)
-            EventRegistry:TriggerEvent("MythicWhispers.AddLog", playerName, text, "character", lineID)
+            EventRegistry:TriggerEvent("MythicWhispers.AddLog", playerName, text, "character")
             EventRegistry:TriggerEvent("MythicWhispers.RefreshConversation", playerName)
 
         elseif(event == "CHAT_MSG_WHISPER_INFORM") then
             local text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, languageID, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, suppressRaidIcons = ...
 
             EventRegistry:TriggerEvent("MythicWhispers.CreateConversation", playerName, guid)
-            EventRegistry:TriggerEvent("MythicWhispers.AddLog", playerName, text, "player", lineID)
+            EventRegistry:TriggerEvent("MythicWhispers.AddLog", playerName, text, "player")
             EventRegistry:TriggerEvent("MythicWhispers.RefreshConversation", playerName)
 
         elseif(event == "PLAYER_ENTERING_WORLD") then

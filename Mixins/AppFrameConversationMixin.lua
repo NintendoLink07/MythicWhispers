@@ -289,7 +289,7 @@ function AppFrameConversationMessageMixin:Refresh()
 
     self.sender = data.sender
 
-    self.Message:SetText(data.message .. " " .. (data.lineID or ""))
+    self.Message:SetText(data.message)
     self.Time:SetText(format("%02d:%02d", data.date.hour, data.date.minute))
 
     self:SetBackdrop(BACKDROP_TUTORIAL)

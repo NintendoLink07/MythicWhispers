@@ -190,7 +190,7 @@ function AppFrameChatOverviewMixin:SetMessages(playerName)
                 logs.numOfUnreadMessages = logs.numOfUnreadMessages - 1
                 v.viewed = true
 
-                EventRegistry:TriggerEvent("MythicWhispers.SendMessageRead", playerName, newDate, v.lineID)
+                EventRegistry:TriggerEvent("MythicWhispers.SendMessageRead", playerName, newDate, v.message)
 
                 self:GetParent().ChatList:RefreshConversationButtons()
             end
@@ -201,7 +201,6 @@ function AppFrameChatOverviewMixin:SetMessages(playerName)
                 sender= v.sender,
                 message = v.message,
                 date = newDate,
-                lineID = v.lineID,
             })
 
         end
