@@ -1,5 +1,9 @@
 local addonName, mw = ...
 
+AppFrameMixin = {}
+
+local playerLineIDTable = {}
+
 local LEFT_SIDE_WIDTH_SCALE = 0.2
 local RIGHT_SIDE_WIDTH_SCALE = 0.8
 
@@ -28,8 +32,6 @@ local voiceChatStatusToGameError =
 	[Enum.VoiceChatStatusCode.PlayerSilenced] = LE_GAME_ERR_VOICE_CHAT_PLAYER_SILENCED,
 	[Enum.VoiceChatStatusCode.PlayerVoiceChatParentalDisabled] = LE_GAME_ERR_VOICE_CHAT_PARENTAL_DISABLE_ALL,
 };
-
-AppFrameMixin = {}
 
 mw.C = {
     STANDARD_FILE_PATH = "Interface/Addons/" .. addonName .. "/res"
@@ -392,12 +394,39 @@ function AppFrameMixin:SetMessageRead(tbl)
     local logs = MW_ChatLogs[sender]
 
     for k, v in MythicWhispers.rpairs(logs.messages) do
+        print(date.hour, v.date.hour, date.minute, v.date.minute)
+
         if(not v.read and C_DateAndTime.CompareCalendarTime(date, v.date) == 0 and message == v.message) then
             v.read = true
             break
         end
     end
 end
+
+function AppFrameMixin:ExecuteHandshake(playerName)
+    local tbl = {
+        event = "EXECUTE_HANDSHAKE",
+        lineID = playerLineIDTable[playerName]
+    }
+
+    C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", MythicWhispers.WriteCBOR(tbl), "WHISPER", playerName)
+end
+
+
+
+function AppFrameMixin:HandleHandshake(tbl)
+    local playerName = tbl.sender
+    local sendTable = {
+        event = playerLineIDTable[playerName] == tbl.lineID and "CONFIRM_HANDSHAKE" or "DENY_HANDSHAKE",
+    }
+
+    C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", MythicWhispers.WriteCBOR(sendTable), "WHISPER", playerName)
+end
+
+function AppFrameMixin:ResetHandshake(tbl)
+    print("RESET")
+end
+
 
 function AppFrameMixin:OnLoad()
     self:SetSize(GetScreenWidth() * MULTIPLICATOR, GetScreenHeight() * MULTIPLICATOR)
@@ -422,6 +451,8 @@ function AppFrameMixin:OnLoad()
     self:SetScript("OnEvent", function(selfFrame, event, ...)
         if(event == "CHAT_MSG_WHISPER") then
             local text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, languageID, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, suppressRaidIcons = ...
+
+            self:ExecuteHandshake(playerName)
 
             EventRegistry:TriggerEvent("MythicWhispers.CreateConversation", playerName, guid)
             EventRegistry:TriggerEvent("MythicWhispers.AddLog", playerName, text, "character")
@@ -497,15 +528,24 @@ function AppFrameMixin:OnLoad()
             local prefix, cborText, channel, sender, target, zoneChannelID, localID, name, instanceID = ...
 
             local tbl = MythicWhispers.ReadCBOR(cborText)
+            tbl.sender = sender
 
             if(tbl.event == "VOICE_CHAT_CHANNEL_TRANSMIT_REQUEST") then
                 self:SendMuteStatusUpdate()
 
             elseif(tbl.event == "TEXT_MESSAGE_READ") then
-                tbl.sender = sender
                 self:SetMessageRead(tbl)
                 EventRegistry:TriggerEvent("MythicWhispers.RefreshConversation", sender)
                 
+            elseif(tbl.event == "EXECUTE_HANDSHAKE") then
+                self:HandleHandshake(tbl)
+
+            elseif(tbl.event == "CONFIRM_HANDSHAKE") then
+                print("CONFIRMED")
+                
+            elseif(tbl.event == "DENY_HANDSHAKE") then
+                self:ResetHandshake()
+
             end
         end
     end)
