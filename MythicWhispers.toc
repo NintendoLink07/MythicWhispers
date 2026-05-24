@@ -8,6 +8,7 @@
 ## SavedVariablesPerCharacter: MW_CharacterChatLogs
 
 GlobalFunctions.lua
+NetworkManagement.lua
 
 Mixins/AppFrameMixin.lua
 
