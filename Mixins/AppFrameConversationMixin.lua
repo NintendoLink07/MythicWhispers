@@ -14,7 +14,7 @@ function AppFrameConversationButtonMixin:ShowNewMessages(numOfMessages)
     self.NumberOfNewMessages:Show()
 
     if(numOfMessages) then
-        self.NumberOfNewMessages:SetText(numOfMessages)
+        self.NumberOfNewMessages:SetText(numOfMessages > 9 and "9+" or numOfMessages)
 
     end
 end
@@ -253,6 +253,34 @@ end
 
 
 
+-- BACKDROP_TEXT_PANEL_0_16
+-- BACKDROP_CHARACTER_CREATE_TOOLTIP_32_32
+-- BACKDROP_TOAST_12_12
+
+
+local BACKDROP_TEXT_PANEL_WITH_BG = {
+    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+	edgeFile = "Interface\\Glues\\Common\\TextPanel-Border",
+	edgeSize = 16,
+	insets = { left = 3, right = 2, top = 1, bottom = 3 },
+}
+
+
+local BACKDROP_TOAST = {
+    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+	edgeFile = "Interface\\FriendsFrame\\UI-Toast-Border",
+	edgeSize = 8,
+	insets = { left = 2, right = 2, top = 2, bottom = 3},
+}
+
+local BACKDROP_TUTORIAL = {
+    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+	edgeSize = 14,
+	insets = { left = 3, right = 3, top = 3, bottom = 3 },
+};
+
+
 
 AppFrameConversationMessageMixin = {}
 
@@ -261,16 +289,31 @@ function AppFrameConversationMessageMixin:Refresh()
 
     self.sender = data.sender
 
-    self.Message:SetText(data.message)
+    self.Message:SetText(data.message .. " " .. (data.lineID or ""))
     self.Time:SetText(format("%02d:%02d", data.date.hour, data.date.minute))
 
-    if(data.sender == "player") then
-        self.Background:SetColorTexture(0.65, 1, 0.65, 1)
+    self:SetBackdrop(BACKDROP_TUTORIAL)
+    self:SetBackdropBorderColor(1, 1, 1, 1)
+
+    self.Time:ClearAllPoints()
+
+    local messageFromPlayer = data.sender == "player"
+
+    if(messageFromPlayer) then
+        --self.Background:SetColorTexture(0.65, 1, 0.65, 1)
+        self:SetBackdropColor(0.65, 1, 0.65, 1)
+        --self.Checkmark:SetDesaturated(not data.viewed)
+        self.Time:SetPoint("BOTTOMRIGHT", -17, 6)
 
     else
-        self.Background:SetColorTexture(1, 1, 1, 1)
+        --self.Background:SetColorTexture(1, 1, 1, 1)
+        self:SetBackdropColor(1, 1, 1, 1)
+        self.Time:SetPoint("BOTTOMRIGHT", -7, 6)
 
     end
+
+    self.Checkmark:SetShown(messageFromPlayer)
+    self.BlueCircle:SetShown(messageFromPlayer and data.read)
 end
 
 

@@ -1,23 +1,30 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\..\FrameXML\UI.xsd">
     <Button name="MW_AppFrameConversationButton" mixin="AppFrameConversationButtonMixin" registerForClicks="LeftButtonUp, RightButtonUp" virtual="true">
-        <Size y="48" />
+        <Size y="52" />
         
-		<NormalTexture parentKey="NormalTexture" atlas="pvpqueue-button-casual-up"/>
-		<PushedTexture atlas="pvpqueue-button-casual-down"/>
-		<HighlightTexture parentKey="HighlightTexture" atlas="pvpqueue-button-casual-highlight" alphaMode="ADD"/>
+		<NormalTexture atlas="Ui-Dialog-New-Button-Default"/>
+		<PushedTexture atlas="Ui-Dialog-New-Button-Down">
+            <Anchors>
+                <Anchor point="TOPLEFT" x="5" y="-4"/>
+                <Anchor point="BOTTOMRIGHT" y="10"/>
+            </Anchors>
+        </PushedTexture>
+		<HighlightTexture atlas="Ui-Dialog-New-Button-Hover" alphaMode="ADD"/>
 
         <Layers>
             <Layer level="OVERLAY">
+                <!--<Texture parentKey="Background" atlas="Ui-Dialog-New-Background" setAllPoints="true"/>!-->
+
                 <Texture parentKey="Picture">
-                    <Size x="40" y="40" />
+                    <Size x="32" y="32" />
                     <Anchors>
-                        <Anchor point="LEFT" x="4"/>
+                        <Anchor point="TOPLEFT" x="7" y="-7"/>
                     </Anchors>
                 </Texture>
 
 				<MaskTexture parentKey="CircleMask" file="Interface\CharacterFrame\TempPortraitAlphaMask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE">
-					<Size x="36" y="36"/>
+					<Size x="28" y="28"/>
 					<Anchors>
 						<Anchor point="CENTER" relativeKey="$parent.Picture" relativePoint="CENTER"/>
 					</Anchors>
@@ -28,23 +35,23 @@
 
                 <FontString parentKey="Name" font="SystemFont_Med1" justifyH="LEFT" justifyV="MIDDLE">
                     <Anchors>
-                        <Anchor point="TOPLEFT" relativeKey="$parent.Picture" relativePoint="TOPRIGHT" x="4" y="-4"/>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.Picture" relativePoint="TOPRIGHT" x="2" y="-2"/>
                     </Anchors>
                     <!--<Color r="0" g="0" b="0" a="1" />!-->
                 </FontString>
 
                 <Texture parentKey="NewMessages" hidden="true">
-                    <Size x="14" y="14" />
+                    <Size x="22" y="14" />
                     <Anchors>
-                        <Anchor point="BOTTOMRIGHT" x="-6" y="8" />
+                        <Anchor point="BOTTOMRIGHT" x="-7" y="15" />
                     </Anchors>
                     <Color r="0.1" g="0.7" b="0.1" a="1" />
                 </Texture>
 
 				<MaskTexture parentKey="CircleMask" file="Interface\CharacterFrame\TempPortraitAlphaMask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE">
-					<Size x="14" y="14"/>
+					<Size x="20" y="14"/>
 					<Anchors>
-						<Anchor point="CENTER" relativeKey="$parent.NewMessages" relativePoint="CENTER"/>
+						<Anchor point="CENTER" relativeKey="$parent.NewMessages"/>
 					</Anchors>
 					<MaskedTextures>
 						<MaskedTexture childKey="NewMessages"/>
@@ -59,7 +66,7 @@
 
                 <FontString parentKey="LastMessage" font="SystemFont_Med1" justifyH="LEFT" justifyV="MIDDLE" wordwrap="false" nonspacewrap="false">
                     <Anchors>
-                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.Picture" relativePoint="BOTTOMRIGHT" x="4" y="4"/>
+                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.Picture" relativePoint="BOTTOMRIGHT" x="2" y="2"/>
                         <Anchor point="BOTTOMRIGHT" relativeKey="$parent.NewMessages" relativePoint="BOTTOMLEFT" x="-4"/>
                     </Anchors>
                     <Color r="0.4" g="0.4" b="0.4" a="1" />
@@ -67,7 +74,7 @@
 
                 <FontString parentKey="Time" font="SystemFont_Med1" justifyH="LEFT" justifyV="MIDDLE">
                     <Anchors>
-                        <Anchor point="TOPRIGHT" x="-6" y="-8" />
+                        <Anchor point="TOPRIGHT" x="-7" y="-9" />
                     </Anchors>
                     <Color r="0.4" g="0.4" b="0.4" a="1" />
                 </FontString>

@@ -1,36 +1,41 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\..\FrameXML\UI.xsd">
-    <Button name="MW_AppFrameConversationMessage" mixin="AppFrameConversationMessageMixin" virtual="true">
+    <Button name="MW_AppFrameConversationMessage" inherits="BackdropTemplate" mixin="AppFrameConversationMessageMixin" virtual="true">
         <Size x="200"/>
         
         <Layers>
-            <Layer level="BACKGROUND">
-                <Texture parentKey="Background" setAllPoints="true">
-                    <Color r="1" g="1" b="1" a="1" />
-                </Texture>
-                
-                <MaskTexture parentKey="BackgroundMask" atlas="shop-card-wide-mask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE" setAllPoints="true">
-					<MaskedTextures>
-						<MaskedTexture childKey="Background"/>
-					</MaskedTextures>
-				</MaskTexture>
-            </Layer>
-
             <Layer level="OVERLAY">
                 <FontString parentKey="Time" font="SystemFont_Tiny2" justifyH="LEFT" justifyV="MIDDLE">
                     <Color r="0.3" g="0.3" b="0.3" a="1" />
                     <Anchors>
-                        <Anchor point="BOTTOMRIGHT" x="-4" y="2" />
+                        <Anchor point="BOTTOMRIGHT" x="-16" y="6" />
                     </Anchors>
                 </FontString>
 
                 <FontString parentKey="Message" font="SystemFont_Med1" justifyH="LEFT" justifyV="MIDDLE" nonspacewrap="true" wordwrap="true">
                     <Color r="0" g="0" b="0" a="1" />
                     <Anchors>
-                        <Anchor point="TOPLEFT" x="4" />
+                        <Anchor point="TOPLEFT" x="8" y="-6"/>
                         <Anchor point="BOTTOMRIGHT" relativeKey="$parent.Time" relativePoint="BOTTOMLEFT" x="-4"/>
                     </Anchors>
                 </FontString>
+
+                <Texture parentKey="Checkmark" atlas="delves-dashboard-checkmark">
+                    <Color r="0.1" g="0.7" b="1" a="1" />
+                    <Size x="7" y="7" />
+                    <Anchors>
+                        <Anchor point="LEFT" relativeKey="$parent.Time" relativePoint="RIGHT" x="3"/>
+                    </Anchors>
+                </Texture>
+            </Layer>
+
+            <Layer level="BORDER">
+                <Texture parentKey="BlueCircle" atlas="UF-RogueCP-FX-Blue">
+                    <Size x="9" y="9" />
+                    <Anchors>
+                        <Anchor point="CENTER" relativeKey="$parent.Checkmark" />
+                    </Anchors>
+                </Texture>
             </Layer>
         </Layers>
     </Button>

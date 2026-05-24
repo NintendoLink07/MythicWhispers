@@ -71,21 +71,15 @@ function AppFrameVoiceChatRoomMixin:OnEvent(event, ...)
         self:Refresh()
 
     elseif(event == "VOICE_CHAT_CHANNEL_ACTIVATED") then
-        MythicWhispers:RefreshChatType()
+        MythicWhispers:TriggerChatTypeEvent()
 
     elseif(event == "CHAT_MSG_ADDON_LOGGED") then
         local prefix, cborText, channel, sender, target, zoneChannelID, localID, name, instanceID = ...
 
-        local text = MythicWhispers.ReadCBOR(cborText)
+        local tbl = MythicWhispers.ReadCBOR(cborText)
 
-        if(string.find(text, "VOICE_CHAT_CHANNEL_TRANSMIT_CHANGED_")) then
-            if(text == "VOICE_CHAT_CHANNEL_TRANSMIT_CHANGED_TRUE") then
-                muteStatusTable[sender] = true
-                
-            elseif(text == "VOICE_CHAT_CHANNEL_TRANSMIT_CHANGED_FALSE") then
-                muteStatusTable[sender] = false
-                
-            end
+        if(tbl == "VOICE_CHAT_CHANNEL_TRANSMIT_CHANGED") then
+            muteStatusTable[sender] = tbl.muted
 
             local frame = self:FindPlayerFrame(sender)
 
@@ -165,85 +159,105 @@ function AppFrameVoiceChatRoomMixin:Refresh()
         local channel = C_VoiceChat.GetChannel(channelID)
 
         if(channel and channel.isActive) then
-            local numMembers = #channel.members
+            local numMembers = #channel.members * 10
 
-            local frameWidth
-            local frameHeight
-
-            local scalar = 4 * ((40 - numMembers) / 100 + 1)
-
-            local map = {
-                [1] = {},
-                [2] = {},
-                [3] = {},
-                [4] = {},
-                [5] = {}
-            }
-
-            local row = 1
+            -- 1. Calculate ideal grid dimensions
+            -- math.ceil and math.sqrt work identically to modern languages
+            local cols = ceil(sqrt(numMembers))
+            local rows = ceil(numMembers / cols)
 
             for k, v in ipairs(channel.members) do
-                local name = C_VoiceChat.GetMemberName(v.memberID, channelID)
-                local guid = C_VoiceChat.GetMemberGUID(v.memberID, channelID)
+                local zeroIdx = k - 1
+                local r = math.floor(zeroIdx / cols)
+                local c = zeroIdx % cols
 
-                local fullName = MythicWhispers.CreateFullNameValuesFrom("unitName", name)
+                -- Standard 1-based positioning for your UI engine
+                local gridRow = r + 1
+                local gridColumn = c + 1
+
+                -- Base sizes
+                local rowSize = 1
+                local colSize = 1
+
+                -- --- DYNAMIC SPANNING LOGIC ---
+
+                -- Check how many members are actually in this specific row
+                local totalMembersInThisRow = cols
+                local isLastRow = (r == rows - 1)
+                
+                if isLastRow then
+                    totalMembersInThisRow = numMembers - (r * cols)
+                end
+
+                -- Calculate how many grid columns each member in this row should span.
+                -- We divide total columns by how many members need to share this row.
+                colSize = math.floor(cols / totalMembersInThisRow)
+
+                -- Adjust the column positioning so they line up side-by-side perfectly
+                gridColumn = (c * colSize) + 1
+
+                -- If it's the absolute last member of an uneven row, stretch it to 
+                -- absorb any remaining fractional columns left over from rounding.
+                if k == numMembers then
+                    local currentRightEdge = gridColumn + colSize - 1
+                    if currentRightEdge < cols then
+                        colSize = colSize + (cols - currentRightEdge)
+                    end
+                end
+
+                -- If the entire grid has empty space vertically (e.g., 2 members in a 2x2 grid context, 
+                -- or a layout that doesn't use all rows), stretch the rowSize to fill the height.
+                if rows > numMembers then
+                    rowSize = math.floor(rows / numMembers)
+                    gridRow = (r * rowSize) + 1
+                end
 
                 local frame = self.framePool:Acquire()
-                frame.fullName = fullName
 
-                if(not frame.origW) then
-                    frame.origW = frame:GetWidth()
-                    frame.origH = frame:GetHeight()
+                frame.gridRow = gridRow
+                frame.gridColumn = gridColumn
+                frame.gridRowSize = rowSize
+                frame.gridColumnSize = colSize
+
+                print(frame.gridRow, frame.gridColumn, frame.gridRowSize, frame.gridColumnSize)
+
+                local name = C_VoiceChat.GetMemberName(v.memberID, channelID)
+
+                if(name) then
+                    local guid = C_VoiceChat.GetMemberGUID(v.memberID, channelID)
+                    local fullName = MythicWhispers.CreateFullNameValuesFrom("unitName", name)
+
+                    frame.fullName = fullName
+                    frame.memberID = v.memberID
+                    frame.channelID = channelID
+
+                    if(not playerColorTable[frame.fullName]) then
+                        playerColorTable[frame.fullName] = {
+                            r = random(35, 75) / 100,
+                            g = random(35, 75) / 100,
+                            b = random(35, 75) / 100,
+                        }
+
+                    end
+
+                    frame.Background:SetColorTexture(self:GetPlayerRGBA(frame.fullName))
+
+                    frame:SetSelfMuted(muteStatusTable[frame.fullName])
+
+                    frame.Name:SetText(name)
+
+                else
+                    frame.Name:SetText(UNKNOWN)
+                    frame.Background:SetColorTexture(1, 1, 1, 1)
+                    frame:SetSelfMuted(false)
 
                 end
-
-                frame:SetWidth(frame.origW * scalar)
-                frame:SetHeight(frame.origH * scalar)
-
-                if(not frameWidth) then
-                    frameWidth = frame:GetWidth()
-                    frameHeight = frame:GetHeight()
-
-                end
-
-                tinsert(map[row], frame)
-
-                frame.gridRow = row
-                frame.gridColumn = #map[row]
-
-                frame.memberID = v.memberID
-                frame.channelID = channelID
-
-                if(not playerColorTable[frame.fullName]) then
-                    playerColorTable[frame.fullName] = {
-                        r = random(35, 75) / 100,
-                        g = random(35, 75) / 100,
-                        b = random(35, 75) / 100,
-                    }
-
-                end
-
-                frame.Background:SetColorTexture(self:GetPlayerRGBA(frame.fullName))
-
-                frame:SetSelfMuted(muteStatusTable[frame.fullName])
-
-                frame.Name:SetText(name)
 
                 frame:Show()
-
-                local numOfElementsInRow = #map[row]
-
-                row = numOfElementsInRow == 8 and row + 1 or row
-
             end
-
-            local gridWidth = numMembers > 7 and frameWidth * 8 or frameWidth * numMembers
-            local gridHeight = ceil(numMembers / 8) * frameHeight
             
-            self.GridManageFrame.Grid:ClearAllPoints()
-            self.GridManageFrame.Grid:SetSize(gridWidth, gridHeight)
             self.GridManageFrame.Grid:MarkDirty()
-            self.GridManageFrame.Grid:SetPoint("CENTER")
+            self.GridManageFrame.Grid:SetAllPoints()
         end
     end
 

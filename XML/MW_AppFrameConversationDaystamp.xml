@@ -22,7 +22,7 @@
             </Layer>
 
             <Layer level="OVERLAY">
-                <FontString parentKey="Date" font="SystemFont_Tiny2" justifyH="LEFT" justifyV="MIDDLE">
+                <FontString parentKey="Date" font="SystemFont_Tiny" justifyH="LEFT" justifyV="MIDDLE">
                     <Color r="0.3" g="0.3" b="0.3" a="1" />
                     <Anchors>
                         <Anchor point="CENTER"/>

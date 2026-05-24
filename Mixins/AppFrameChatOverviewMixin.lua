@@ -90,7 +90,7 @@ function AppFrameChatOverviewMixin:OnLoad()
 
             for i = 1, 100, 1 do
                 if(stringWidth < i * MAX_NUM_CHARACTERS_PER_LINE) then
-                    return i * LINE_HEIGHT + 10;
+                    return i * LINE_HEIGHT + 18;
 
                 end
             end
@@ -190,14 +190,18 @@ function AppFrameChatOverviewMixin:SetMessages(playerName)
                 logs.numOfUnreadMessages = logs.numOfUnreadMessages - 1
                 v.viewed = true
 
+                EventRegistry:TriggerEvent("MythicWhispers.SendMessageRead", playerName, newDate, v.lineID)
+
                 self:GetParent().ChatList:RefreshConversationButtons()
             end
 
             dataProvider:Insert({
                 template = "MW_AppFrameConversationMessage",
+                read = v.read,
                 sender= v.sender,
                 message = v.message,
                 date = newDate,
+                lineID = v.lineID,
             })
 
         end

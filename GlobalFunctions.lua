@@ -2,6 +2,16 @@ local addonName, mw = ...
 
 _G.MythicWhispers = mw
 
+function MythicWhispers.rpairs(t)
+	return function(t, i)
+		i = i - 1
+		if i ~= 0 then
+			return i, t[i]
+		end
+	end, t, #t + 1
+end
+
+
 function MythicWhispers:TriggerChatTypeEvent()
     local channelID = C_VoiceChat.GetActiveChannelID()
 

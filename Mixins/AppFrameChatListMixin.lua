@@ -20,7 +20,7 @@ function AppFrameChatListMixin:OnLoad()
         factory(template, MW_CreateConversation)
 
     end)
-    view:SetPadding(3, 3, 3, 3, 4);
+    view:SetPadding(2, 2, 2, 2, 2);
 
 	local scrollBoxAnchorsWithBar = {
 		CreateAnchor(self.ScrollBox:GetPointByName("TOPLEFT")),
@@ -82,10 +82,17 @@ end
 function AppFrameChatListMixin:RefreshConversationButtons()
     dataProvider:Flush()
 
-    if(C_VoiceChat.GetActiveChannelID()) then
-        dataProvider:Insert({
-            template = "MW_AppFrameConversationButtonVoiceChat",
-        })
+    local channelID = C_VoiceChat.GetActiveChannelID()
+
+    if(channelID) then
+        local channel = C_VoiceChat.GetChannel(channelID)
+
+        if(channel and channel.isActive) then
+            dataProvider:Insert({
+                template = "MW_AppFrameConversationButtonVoiceChat",
+            })
+
+        end
     end
 
     if(MW_ChatLogs and self:HasLogs()) then

@@ -65,7 +65,6 @@ local EXPANSIONS = {
 
 function AppFrameMixin:ClearPalette()
     self.TitleBar:SetBackdrop(BACKDROP_INFO_WITH_BG)
-    self.TitleBar:SetBackdropBorderColor(0.85, 0.85, 0.85, 1)
     self.TitleBar:SetBackdropBorderColor(GRAY_FONT_COLOR:GetRGBA())
     self.TitleBar.Background:SetTexture(nil)
 
@@ -146,7 +145,8 @@ function AppFrameMixin:CreatePlayerLogs(playerName)
         name = playerName,
         numOfUnreadMessages = 0,
         lastOnline = {monthDay = 0},
-        messages = {}
+        messages = {},
+        scheduledStatusMessages = {},
     }
 end
 
@@ -160,6 +160,11 @@ function AppFrameMixin:CreateConversation(playerName, guid)
             logs = MW_ChatLogs[playerName]
         end
 
+        if(not logs.scheduledStatusMessages) then
+            logs.scheduledStatusMessages = {}
+
+        end
+
         if(guid) then
             logs.unitGUID = guid
 
@@ -167,27 +172,32 @@ function AppFrameMixin:CreateConversation(playerName, guid)
     end
 end
 
-function AppFrameMixin:AddLog(playerName, text, sender, viewed)
+function AppFrameMixin:AddLog(playerName, text, sender, lineID)
     if(playerName) then
         local logs = MW_ChatLogs[playerName]
         local chatOpen = self.ChatOverview:GetOpenConversationName() == playerName
+        local currentDate = C_DateAndTime.GetCurrentCalendarTime()
 
         if(sender == "character") then
             if(not chatOpen) then
                 logs.numOfUnreadMessages = logs.numOfUnreadMessages + 1
 
+            else
+                EventRegistry:TriggerEvent("MythicWhispers.SendMessageRead", playerName, currentDate, lineID)
+
             end
 
-            logs.lastOnline = C_DateAndTime.GetCurrentCalendarTime()
+            logs.lastOnline = currentDate
 
         end
-
+        
         tinsert(logs.messages, {
             sender = sender,
             message = text,
-            date = C_DateAndTime.GetCurrentCalendarTime(),
+            date = currentDate,
             viewed = chatOpen or sender == "player",
             timestamp = GetServerTime(),
+            lineID = lineID,
         })
     end
 end
@@ -297,7 +307,12 @@ function AppFrameMixin:CheckCallStatus(frame)
 end
 
 function AppFrameMixin:SendMuteStatusUpdate()
-    C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", MythicWhispers.WriteCBOR("VOICE_CHAT_CHANNEL_TRANSMIT_CHANGED_" .. strupper(tostring(C_VoiceChat.IsMuted()))), "PARTY")
+    local tbl = {
+        event = "VOICE_CHAT_CHANNEL_TRANSMIT_CHANGED",
+        muted = C_VoiceChat.IsMuted()
+    }
+
+    local status = C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", MythicWhispers.WriteCBOR(tbl), MythicWhispers:GetChatType())
 
 end
 
@@ -308,7 +323,81 @@ function AppFrameMixin:RequestMuteStatusUpdate()
         local channel = C_VoiceChat.GetChannel(channelID)
 
         if(channel and channel.isActive) then
-            C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", MythicWhispers.WriteCBOR("VOICE_CHAT_CHANNEL_TRANSMIT_REQUEST"), "PARTY")
+            local tbl = {
+                event = "VOICE_CHAT_CHANNEL_TRANSMIT_REQUEST",
+            }
+            local status = C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", MythicWhispers.WriteCBOR(tbl), MythicWhispers:GetChatType())
+
+        end
+    end
+end
+
+function AppFrameMixin:ScheduleAddonMessageForReadMessages(sender, tbl)
+    local logs = MW_ChatLogs[sender]
+
+    tinsert(logs.scheduledStatusMessages, tbl)
+
+end
+
+function AppFrameMixin:SendMessageRead(sender, date, lineID)
+    if(sender and date and lineID) then
+        local tbl = {
+            event = "TEXT_MESSAGE_READ",
+            lineID = lineID,
+            date = date,
+        }
+
+        local status = C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", MythicWhispers.WriteCBOR(tbl), "WHISPER", sender)
+
+        if(status == Enum.SendAddonMessageResult.TargetOffline) then
+            self:ScheduleAddonMessageForReadMessages()
+
+        end
+    end
+end
+
+--[[function AppFrameMixin:SendMessageReadOverChannel(sender, date, lineID)
+    if(sender and date and lineID) then
+        local chatName = "MYTHICWHISPERSVALUESCHAT"
+
+        JoinPermanentChannel(chatName, nil, nil, 0)
+
+        local channelID
+
+        for i = 1, 100, 1 do
+	        local name, header, _, channelNumber, count, active, category, channelType = GetChannelDisplayInfo(i);
+
+            if(name == chatName) then
+                channelID = channelNumber
+                break
+
+            end
+        end
+
+        if(channelID) then
+            local tbl = {
+                event = "TEXT_MESSAGE_READ",
+                lineID = lineID,
+                date = date,
+                sender = sender
+            }
+            local result = C_ChatInfo.SendAddonMessageLogged("MYTHICWHISPERS", MythicWhispers.WriteCBOR(tbl), "CHANNEL", channelID)
+
+            print("SENT!", result)
+        end
+    end
+end]]
+
+function AppFrameMixin:SetMessageRead(tbl)
+    local sender, date, lineID = tbl.sender, tbl.date, tbl.lineID
+    local logs = MW_ChatLogs[sender]
+
+    local checkForID = lineID + 1
+
+    for k, v in MythicWhispers.rpairs(logs.messages) do
+        if(v.lineID == checkForID and C_DateAndTime.CompareCalendarTime(date, v.date) == 0) then
+
+            v.read = true
 
         end
     end
@@ -330,6 +419,7 @@ function AppFrameMixin:OnLoad()
 	EventRegistry:RegisterCallback("MythicWhispers.OpenConversation", self.CreateConversation, self);
 	EventRegistry:RegisterCallback("MythicWhispers.HandleJoinRequest", self.HandleJoinRequest, self);
 	EventRegistry:RegisterCallback("MythicWhispers.OpenVoiceChatRoom", self.RequestMuteStatusUpdate, self);
+	EventRegistry:RegisterCallback("MythicWhispers.SendMessageRead", self.SendMessageRead, self);
 
     C_ChatInfo.RegisterAddonMessagePrefix(addonName)
 
@@ -338,14 +428,14 @@ function AppFrameMixin:OnLoad()
             local text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, languageID, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, suppressRaidIcons = ...
 
             EventRegistry:TriggerEvent("MythicWhispers.CreateConversation", playerName, guid)
-            EventRegistry:TriggerEvent("MythicWhispers.AddLog", playerName, text, "character")
+            EventRegistry:TriggerEvent("MythicWhispers.AddLog", playerName, text, "character", lineID)
             EventRegistry:TriggerEvent("MythicWhispers.RefreshConversation", playerName)
 
         elseif(event == "CHAT_MSG_WHISPER_INFORM") then
             local text, playerName, languageName, channelName, playerName2, specialFlags, zoneChannelID, channelIndex, channelBaseName, languageID, lineID, guid, bnSenderID, isMobile, isSubtitle, hideSenderInLetterbox, suppressRaidIcons = ...
 
             EventRegistry:TriggerEvent("MythicWhispers.CreateConversation", playerName, guid)
-            EventRegistry:TriggerEvent("MythicWhispers.AddLog", playerName, text, "player")
+            EventRegistry:TriggerEvent("MythicWhispers.AddLog", playerName, text, "player", lineID)
             EventRegistry:TriggerEvent("MythicWhispers.RefreshConversation", playerName)
 
         elseif(event == "PLAYER_ENTERING_WORLD") then
@@ -372,7 +462,10 @@ function AppFrameMixin:OnLoad()
             self:SetVoiceChatCallStatusColor(...)
 
         elseif(event == "VOICE_CHAT_CHANNEL_MEMBER_ADDED" or event == "VOICE_CHAT_CHANNEL_MEMBER_REMOVED") then
+            if(self.VoiceChatRoom:IsShown()) then
+                self.VoiceChatRoom:Refresh()
 
+            end
         elseif(event == "VOICE_CHAT_CHANNEL_JOINED") then
             local status, channelID, channelType, clubId, streamId = ...
 
@@ -407,17 +500,26 @@ function AppFrameMixin:OnLoad()
         elseif(event == "CHAT_MSG_ADDON_LOGGED") then
             local prefix, cborText, channel, sender, target, zoneChannelID, localID, name, instanceID = ...
 
-            local text  = MythicWhispers.ReadCBOR(cborText)
+            local tbl = MythicWhispers.ReadCBOR(cborText)
+            tbl.sender = sender
 
-            if(text == "VOICE_CHAT_CHANNEL_TRANSMIT_REQUEST") then
+            if(tbl.event == "VOICE_CHAT_CHANNEL_TRANSMIT_REQUEST") then
                 self:SendMuteStatusUpdate()
+
+            elseif(tbl.event == "TEXT_MESSAGE_READ") then
+                self:SetMessageRead(tbl)
+                EventRegistry:TriggerEvent("MythicWhispers.RefreshConversation", sender)
+
                 
             end
         end
     end)
 
+    
+
     self:RegisterEvent("CHAT_MSG_WHISPER")
     self:RegisterEvent("CHAT_MSG_WHISPER_INFORM")
+
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     self:RegisterEvent("VOICE_CHAT_CHANNEL_ACTIVATED")
     self:RegisterEvent("VOICE_CHAT_CHANNEL_JOINED")
